@@ -11,13 +11,21 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface DeepSearch {
+public @interface OtMDeepSearch {
     /**
-     * 基础id (类字段名)
+     * 自身id (类字段名)
+     *
+     * @return 自身id
+     */
+    String field() default "id";
+
+    /**
+     * 基础id（表字段名）
+     * 另一个表中，用于关联这张表的字段名
      *
      * @return 基础id
      */
-    String field() default "";
+    String baseId() default "";
 
     /**
      * 服务

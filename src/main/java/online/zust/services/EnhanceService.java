@@ -12,8 +12,9 @@ import com.baomidou.mybatisplus.core.toolkit.*;
 import com.baomidou.mybatisplus.core.toolkit.reflect.GenericTypeUtils;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import online.zust.services.annotation.DeepSearch;
-import online.zust.services.annotation.ListDeepSearch;
+import online.zust.services.annotation.OtMDeepSearch;
+import online.zust.services.annotation.OtODeepSearch;
+import online.zust.services.annotation.MtMDeepSearch;
 import online.zust.services.exception.ErrorDeepSearchException;
 import online.zust.services.utils.ProxyUtil;
 import org.apache.ibatis.binding.MapperMethod;
@@ -174,19 +175,54 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
         Class<?> aClass = entity.getClass();
         Field[] declaredFields = aClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
-            if (declaredField.isAnnotationPresent(DeepSearch.class)) {
-                handleEntityAnnotation(entity, declaredField, aClass);
+            if (declaredField.isAnnotationPresent(OtODeepSearch.class)) {
+                handleOtOAnnotation(entity, declaredField, aClass);
             }
-            if (declaredField.isAnnotationPresent(ListDeepSearch.class)) {
-                handleListAnnotation(entity, declaredField, aClass);
+            if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
+                handleMtMAnnotation(entity, declaredField, aClass);
+            }
+            if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
+                handleOtMAnnotation(entity, declaredField, aClass);
             }
         }
         return entity;
     }
 
-    private void handleListAnnotation(T entity, Field deepSearchField, Class<?> aClass) {
+    private void handleOtMAnnotation(T entity, Field declaredField, Class<?> aClass) {
+        declaredField.setAccessible(true);
+        OtMDeepSearch otMDeepSearch = declaredField.getAnnotation(OtMDeepSearch.class);
+        if (otMDeepSearch != null) {
+            try {
+                deepSearchListAndSetValue(entity, declaredField, aClass, otMDeepSearch);
+            } catch (Exception e) {
+                log.error("获取字段值失败: ", e);
+                // 暂时不需要抛出异常，直接返回null
+                if (otMDeepSearch.notNull()) {
+                    throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private void deepSearchListAndSetValue(T entity, Field declaredField, Class<?> aClass, OtMDeepSearch otMDeepSearch)
+            throws NoSuchFieldException, IllegalAccessException {
+        String field = otMDeepSearch.field();
+        String baseId = otMDeepSearch.baseId();
+        Class<? extends EnhanceService> service = otMDeepSearch.service();
+        // field是自身的唯一标识，baseId是另一张表中用于关联这张表的字段名
+        EnhanceService bean = ProxyUtil.getBean(service);
+        Field declaredField1 = aClass.getDeclaredField(field);
+        declaredField1.setAccessible(true);
+        Object value = declaredField1.get(entity);
+        if (value instanceof Long l) {
+            List<?> list = bean.list(new QueryWrapper<>().eq(baseId, l));
+            declaredField.set(entity, list);
+        }
+    }
+
+    private void handleMtMAnnotation(T entity, Field deepSearchField, Class<?> aClass) {
         deepSearchField.setAccessible(true);
-        ListDeepSearch deepSearchList = deepSearchField.getAnnotation(ListDeepSearch.class);
+        MtMDeepSearch deepSearchList = deepSearchField.getAnnotation(MtMDeepSearch.class);
         if (deepSearchList != null) {
             try {
                 deepSearchListAndSetValue(entity, deepSearchField, aClass, deepSearchList);
@@ -200,16 +236,16 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
         }
     }
 
-    private void handleEntityAnnotation(T entity, Field deepSearchField, Class<?> aClass) {
+    private void handleOtOAnnotation(T entity, Field deepSearchField, Class<?> aClass) {
         deepSearchField.setAccessible(true);
-        DeepSearch deepSearchEntity = deepSearchField.getAnnotation(DeepSearch.class);
-        if (deepSearchEntity != null) {
+        OtODeepSearch otODeepSearchEntity = deepSearchField.getAnnotation(OtODeepSearch.class);
+        if (otODeepSearchEntity != null) {
             try {
-                deepSearchEntityAndSetValue(entity, deepSearchField, aClass, deepSearchEntity);
+                deepSearchEntityAndSetValue(entity, deepSearchField, aClass, otODeepSearchEntity);
             } catch (Exception e) {
                 log.error("获取字段值失败: ", e);
                 // 暂时不需要抛出异常，直接返回null
-                if (deepSearchEntity.notNull()) {
+                if (otODeepSearchEntity.notNull()) {
                     throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
                 }
                 return;
@@ -217,7 +253,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
         }
     }
 
-    private <T> void deepSearchListAndSetValue(T entity, Field deepSearchField, Class<?> aClass, ListDeepSearch deepSearchList) throws NoSuchFieldException, IllegalAccessException {
+    private <T> void deepSearchListAndSetValue(T entity, Field deepSearchField, Class<?> aClass, MtMDeepSearch deepSearchList) throws NoSuchFieldException, IllegalAccessException {
         Class<? extends EnhanceService> relaService = deepSearchList.RelaService();
         Class<? extends EnhanceService> targetService = deepSearchList.targetService();
         String column = deepSearchList.baseId();
@@ -272,9 +308,9 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
         deepSearchField.set(entity, list);
     }
 
-    private <T> void deepSearchEntityAndSetValue(T entity, Field deepSearchField, Class<?> aClass, DeepSearch annotation) throws NoSuchFieldException, IllegalAccessException {
+    private <T> void deepSearchEntityAndSetValue(T entity, Field deepSearchField, Class<?> aClass, OtODeepSearch annotation) throws NoSuchFieldException, IllegalAccessException {
         // 获取注解中的字段
-        String field = annotation.field();
+        String field = annotation.baseId();
         if (field.isEmpty()) {
             field = deepSearchField.getName() + "Id";
         }

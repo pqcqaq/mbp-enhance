@@ -1,3 +1,6 @@
+online\zust\services\annotation\ListDeepSearch.class
+online\zust\services\config\MbpEnhanceAutoInject.class
+online\zust\services\exception\ErrorDeepSearchException.class
 online\zust\services\annotation\DeepSearch.class
 online\zust\services\utils\ProxyUtil.class
 online\zust\services\EnhanceService.class

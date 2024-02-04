@@ -11,15 +11,19 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ListDeepSearch {
+public @interface MtMDeepSearch {
     /**
      * 基础id (表字段名)
+     * 关联*表*中表示自己id的字段名
+     *
      * @return 基础id
      */
     String baseId();
 
     /**
      * 目标id（类字段名）
+     * 关联*对象*中表示目标id的字段名
+     *
      * @return 目标id
      */
     String targetId();
