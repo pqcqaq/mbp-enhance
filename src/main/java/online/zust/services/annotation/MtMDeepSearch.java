@@ -33,7 +33,7 @@ public @interface MtMDeepSearch {
      *
      * @return 关联服务
      */
-    Class<? extends EnhanceService> RelaService();
+    Class<? extends EnhanceService> relaService();
 
     /**
      * 服务

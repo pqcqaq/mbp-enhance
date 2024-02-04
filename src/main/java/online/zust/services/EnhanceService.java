@@ -254,7 +254,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
     }
 
     private <T> void deepSearchListAndSetValue(T entity, Field deepSearchField, Class<?> aClass, MtMDeepSearch deepSearchList) throws NoSuchFieldException, IllegalAccessException {
-        Class<? extends EnhanceService> relaService = deepSearchList.RelaService();
+        Class<? extends EnhanceService> relaService = deepSearchList.relaService();
         Class<? extends EnhanceService> targetService = deepSearchList.targetService();
         String column = deepSearchList.baseId();
         String targetIdFieldName = deepSearchList.targetId();
