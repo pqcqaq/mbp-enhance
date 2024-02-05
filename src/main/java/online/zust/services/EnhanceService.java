@@ -10,11 +10,10 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.override.MybatisMapperProxy;
 import com.baomidou.mybatisplus.core.toolkit.*;
 import com.baomidou.mybatisplus.core.toolkit.reflect.GenericTypeUtils;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+import online.zust.services.annotation.MtMDeepSearch;
 import online.zust.services.annotation.OtMDeepSearch;
 import online.zust.services.annotation.OtODeepSearch;
-import online.zust.services.annotation.MtMDeepSearch;
 import online.zust.services.exception.ErrorDeepSearchException;
 import online.zust.services.utils.ProxyUtil;
 import org.apache.ibatis.binding.MapperMethod;
@@ -40,7 +39,7 @@ import java.util.function.Function;
  * @author qcqcqc
  */
 @SuppressWarnings("all")
-public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
+public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhance<T> {
 
     protected final Log log = LogFactory.getLog(getClass());
 
@@ -162,12 +161,21 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
         return byId;
     }
 
+    @Override
     public List<T> list(QueryWrapper<T> queryWrapper) {
         List<T> ts = baseMapper.selectList(queryWrapper);
         ts.forEach(this::getDeepSearch);
         return ts;
     }
 
+    @Override
+    public List<T> listByIds(Collection<? extends Serializable> idList) {
+        List<T> ts = getBaseMapper().selectBatchIds(idList);
+        ts.forEach(this::getDeepSearch);
+        return ts;
+    }
+
+    @Override
     public T getDeepSearch(T entity) {
         if (entity == null) {
             return null;
@@ -259,7 +267,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IService<T> {
         String column = deepSearchList.baseId();
         String targetIdFieldName = deepSearchList.targetId();
         // 获取entity的id，构造查询条件，relaService中查找对应的全部id
-        Field declaredField = aClass.getDeclaredField("id");
+        Field declaredField = aClass.getDeclaredField(deepSearchList.targetField());
         if (declaredField == null) {
             // 字段上是否有TableId注解
             Field[] declaredFields = aClass.getDeclaredFields();
