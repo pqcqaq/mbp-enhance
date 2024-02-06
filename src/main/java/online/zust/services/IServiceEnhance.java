@@ -34,7 +34,7 @@ public interface IServiceEnhance<T> extends IService<T> {
      * @return 实体列表
      */
     @Override
-    List<T> listByIds(Collection<? extends Serializable> idList)
+    List<T> listByIds(Collection<? extends Serializable> idList);
 
     /**
      * 深度搜索
