@@ -41,6 +41,8 @@ import java.util.function.Function;
 @SuppressWarnings("all")
 public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhance<T> {
 
+    private final int DEEP = 9;
+
     protected final Log log = LogFactory.getLog(getClass());
 
     protected final Class<?>[] typeArguments = GenericTypeUtils.resolveTypeArguments(getClass(), EnhanceService.class);
@@ -162,9 +164,29 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
     }
 
     @Override
+    public T getById(Serializable id, int deep) {
+        T byId = baseMapper.selectById(id);
+        if (deep <= 0) {
+            return byId;
+        }
+        byId = getDeepSearch(byId, deep);
+        return byId;
+    }
+
+    @Override
     public List<T> list(QueryWrapper<T> queryWrapper) {
         List<T> ts = baseMapper.selectList(queryWrapper);
         ts.forEach(this::getDeepSearch);
+        return ts;
+    }
+
+    @Override
+    public List<T> list(QueryWrapper<T> queryWrapper, int deep) {
+        List<T> ts = baseMapper.selectList(queryWrapper);
+        if (deep <= 0) {
+            return ts;
+        }
+        ts.forEach(e -> getDeepSearch(e, deep));
         return ts;
     }
 
@@ -176,7 +198,25 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
     }
 
     @Override
+    public List<T> listByIds(Collection<? extends Serializable> idList, int deep) {
+        List<T> ts = getBaseMapper().selectBatchIds(idList);
+        if (deep <= 0) {
+            return ts;
+        }
+        ts.forEach(e -> getDeepSearch(e, deep));
+        return ts;
+    }
+
+    @Override
     public T getDeepSearch(T entity) {
+        return getDeepSearch(entity, DEEP);
+    }
+
+    @Override
+    public T getDeepSearch(T entity, int deep) {
+        if (deep <= 0) {
+            return entity;
+        }
         if (entity == null) {
             return null;
         }
@@ -184,35 +224,33 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         Field[] declaredFields = aClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
             if (declaredField.isAnnotationPresent(OtODeepSearch.class)) {
-                handleOtOAnnotation(entity, declaredField, aClass);
+                handleOtOAnnotation(entity, declaredField, aClass, deep);
             }
             if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
-                handleMtMAnnotation(entity, declaredField, aClass);
+                handleMtMAnnotation(entity, declaredField, aClass, deep);
             }
             if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
-                handleOtMAnnotation(entity, declaredField, aClass);
+                handleOtMAnnotation(entity, declaredField, aClass, deep);
             }
         }
         return entity;
     }
 
-    private void handleOtMAnnotation(T entity, Field declaredField, Class<?> aClass) {
+    private void handleOtMAnnotation(T entity, Field declaredField, Class<?> aClass, int deep) {
         declaredField.setAccessible(true);
         OtMDeepSearch otMDeepSearch = declaredField.getAnnotation(OtMDeepSearch.class);
-        if (otMDeepSearch != null) {
-            try {
-                deepSearchListAndSetValue(entity, declaredField, aClass, otMDeepSearch);
-            } catch (Exception e) {
-                log.error("获取字段值失败: ", e);
-                // 暂时不需要抛出异常，直接返回null
-                if (otMDeepSearch.notNull()) {
-                    throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
-                }
+        try {
+            deepSearchListAndSetValue(entity, declaredField, aClass, otMDeepSearch, deep);
+        } catch (Exception e) {
+            log.error("获取字段值失败: ", e);
+            // 暂时不需要抛出异常，直接返回null
+            if (otMDeepSearch.notNull()) {
+                throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
             }
         }
     }
 
-    private void deepSearchListAndSetValue(T entity, Field declaredField, Class<?> aClass, OtMDeepSearch otMDeepSearch)
+    private void deepSearchListAndSetValue(T entity, Field declaredField, Class<?> aClass, OtMDeepSearch otMDeepSearch, int deep)
             throws NoSuchFieldException, IllegalAccessException {
         String field = otMDeepSearch.field();
         String baseId = otMDeepSearch.baseId();
@@ -223,45 +261,42 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         declaredField1.setAccessible(true);
         Object value = declaredField1.get(entity);
         if (value instanceof Long l) {
-            List<?> list = bean.list(new QueryWrapper<>().eq(baseId, l));
+            List<?> list = bean.list(new QueryWrapper<>().eq(baseId, l), deep - 1);
             declaredField.set(entity, list);
         }
     }
 
-    private void handleMtMAnnotation(T entity, Field deepSearchField, Class<?> aClass) {
+    private void handleMtMAnnotation(T entity, Field deepSearchField, Class<?> aClass, int deep) {
         deepSearchField.setAccessible(true);
         MtMDeepSearch deepSearchList = deepSearchField.getAnnotation(MtMDeepSearch.class);
-        if (deepSearchList != null) {
-            try {
-                deepSearchListAndSetValue(entity, deepSearchField, aClass, deepSearchList);
-            } catch (Exception e) {
-                log.error("获取字段值失败: ", e);
-                // 暂时不需要抛出异常，直接返回null
-                if (deepSearchList.notNull()) {
-                    throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
-                }
+        try {
+            deepSearchListAndSetValue(entity, deepSearchField, aClass, deepSearchList, deep);
+        } catch (Exception e) {
+            log.error("获取字段值失败: ", e);
+            // 暂时不需要抛出异常，直接返回null
+            if (deepSearchList.notNull()) {
+                throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
             }
         }
     }
 
-    private void handleOtOAnnotation(T entity, Field deepSearchField, Class<?> aClass) {
+    private void handleOtOAnnotation(T entity, Field deepSearchField, Class<?> aClass, int deep) {
         deepSearchField.setAccessible(true);
         OtODeepSearch otODeepSearchEntity = deepSearchField.getAnnotation(OtODeepSearch.class);
-        if (otODeepSearchEntity != null) {
-            try {
-                deepSearchEntityAndSetValue(entity, deepSearchField, aClass, otODeepSearchEntity);
-            } catch (Exception e) {
-                log.error("获取字段值失败: ", e);
-                // 暂时不需要抛出异常，直接返回null
-                if (otODeepSearchEntity.notNull()) {
-                    throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
-                }
-                return;
+        try {
+            deepSearchEntityAndSetValue(entity, deepSearchField, aClass, otODeepSearchEntity, deep);
+        } catch (Exception e) {
+            log.error("获取字段值失败: ", e);
+            // 暂时不需要抛出异常，直接返回null
+            if (otODeepSearchEntity.notNull()) {
+                throw new ErrorDeepSearchException("获取字段值失败:" + e.getMessage());
             }
+            return;
         }
     }
 
-    private <T> void deepSearchListAndSetValue(T entity, Field deepSearchField, Class<?> aClass, MtMDeepSearch deepSearchList) throws NoSuchFieldException, IllegalAccessException {
+    private <T> void deepSearchListAndSetValue(T entity, Field deepSearchField, Class<?> aClass, MtMDeepSearch deepSearchList, int deep)
+            throws NoSuchFieldException, IllegalAccessException {
         Class<? extends EnhanceService> relaService = deepSearchList.relaService();
         Class<? extends EnhanceService> targetService = deepSearchList.targetService();
         String column = deepSearchList.baseId();
@@ -307,7 +342,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             return;
         }
         EnhanceService targetServiceImpl = ProxyUtil.getBean(targetService);
-        List<?> list = targetServiceImpl.listByIds(targetIds);
+        List<?> list = targetServiceImpl.listByIds(targetIds, deep - 1);
 
         if (targetIds.size() != list.size()) {
             log.warn("关系表中的id和目标表中的id数量不一致，可能存在数据库异常");
@@ -316,7 +351,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         deepSearchField.set(entity, list);
     }
 
-    private <T> void deepSearchEntityAndSetValue(T entity, Field deepSearchField, Class<?> aClass, OtODeepSearch annotation) throws NoSuchFieldException, IllegalAccessException {
+    private <T> void deepSearchEntityAndSetValue(T entity, Field deepSearchField, Class<?> aClass, OtODeepSearch annotation, int deep) throws NoSuchFieldException, IllegalAccessException {
         // 获取注解中的字段
         String field = annotation.baseId();
         if (field.isEmpty()) {
@@ -328,15 +363,11 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         EnhanceService bean = ProxyUtil.getBean(service);
         // 名为field的字段的值
         Field declaredField = aClass.getDeclaredField(field);
-        setValueForEntity(entity, deepSearchField, declaredField, bean);
-    }
-
-    private <T> void setValueForEntity(T entity, Field deepSearchField, Field declaredField, EnhanceService bean) throws IllegalAccessException {
         declaredField.setAccessible(true);
         Object value = declaredField.get(entity);
         if (value instanceof Long l) {
             // 获取service的getById方法
-            Object byId1 = bean.getById(l);
+            Object byId1 = bean.getById(l, deep - 1);
             deepSearchField.set(entity, byId1);
         }
     }

@@ -20,11 +20,11 @@
 -docencoding
 'UTF-8'
 -doctitle
-'mbp-enhance 1.0.0 API'
+'mbp-enhance 1.1.0 API'
 -use
 -version
 -windowtitle
-'mbp-enhance 1.0.0 API'
+'mbp-enhance 1.1.0 API'
 online.zust.services.annotation
 online.zust.services.config
 online.zust.services
@@ -76,22 +76,22 @@ E:\maven\maven_repository\org\slf4j\slf4j-api\1.7.36\slf4j-api-1.7.36.jar = 1689
 E:\maven\maven_repository\org\springframework\spring-jdbc\5.3.24\spring-jdbc-5.3.24.jar = 1689517620375
 E:\maven\maven_repository\org\springframework\spring-tx\5.3.24\spring-tx-5.3.24.jar = 1689517613636
 D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\src\main\java = 1706937436944
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\generated-sources\annotations = 1706964110743
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\allclasses-index.html = 1707066508906
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\allpackages-index.html = 1707066508907
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\element-list = 1707066508853
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\help-doc.html = 1707066508926
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\index-all.html = 1707066508922
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\index.html = 1707066508899
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\jquery-ui.overrides.css = 1707066508932
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\member-search-index.js = 1707066508910
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\module-search-index.js = 1707066508908
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\overview-summary.html = 1707066508923
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\overview-tree.html = 1707066508897
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\package-search-index.js = 1707066508909
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\script.js = 1707066508928
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\search.js = 1707066508929
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\serialized-form.html = 1707066508875
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\stylesheet.css = 1707066508927
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\tag-search-index.js = 1707066508910
-D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\type-search-index.js = 1707066508909
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\generated-sources\annotations = 1707379491674
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\allclasses-index.html = 1707379493706
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\allpackages-index.html = 1707379493708
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\element-list = 1707379493650
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\help-doc.html = 1707379493723
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\index-all.html = 1707379493720
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\index.html = 1707379493699
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\jquery-ui.overrides.css = 1707379493730
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\member-search-index.js = 1707379493710
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\module-search-index.js = 1707379493708
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\overview-summary.html = 1707379493721
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\overview-tree.html = 1707379493697
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\package-search-index.js = 1707379493709
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\script.js = 1707379493725
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\search.js = 1707379493726
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\serialized-form.html = 1707379493675
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\stylesheet.css = 1707379493724
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\tag-search-index.js = 1707379493710
+D:\Develop\JavaProgram\mybatisplus-enhance\mbp-enhance\target\apidocs\type-search-index.js = 1707379493709

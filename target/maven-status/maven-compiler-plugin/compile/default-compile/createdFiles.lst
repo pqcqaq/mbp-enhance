@@ -1,5 +1,10 @@
 online\zust\services\config\MbpEnhanceAutoInject.class
 online\zust\services\exception\ErrorDeepSearchException.class
+online\zust\services\utils\BeanConventUtils.class
+online\zust\services\utils\BeanConventUtils$BeanConventException.class
+online\zust\services\annotation\OtMDeepSearch.class
 online\zust\services\IServiceEnhance.class
+online\zust\services\annotation\MtMDeepSearch.class
+online\zust\services\annotation\OtODeepSearch.class
 online\zust\services\utils\ProxyUtil.class
 online\zust\services\EnhanceService.class
