@@ -3,6 +3,8 @@ package online.zust.services.utils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import online.zust.services.annotation.convent.CustomConvent;
+import online.zust.services.annotation.convent.FromField;
 import online.zust.services.annotation.convent.SourceField;
 import online.zust.services.config.ConventConfig;
 import org.slf4j.Logger;
@@ -50,6 +52,9 @@ public class BeanConventUtils {
         }
         try {
             T t = OBJECT_MAPPER.convertValue(entity, clazz);
+            if (clazz.getAnnotation(CustomConvent.class) == null) {
+                return t;
+            }
             return fieldConvent(entity, t);
         } catch (Exception e) {
             throw new BeanConventException(e);
@@ -62,21 +67,18 @@ public class BeanConventUtils {
         for (Field declaredField : declaredFields) {
             try {
                 declaredField.setAccessible(true);
+                // 如果字段为null,则根据注解进行赋值
                 if (declaredField.get(after) == null) {
-                    SourceField annotation = declaredField.getAnnotation(SourceField.class);
-                    if (annotation != null) {
-                        String fieldName = annotation.name();
-                        Field field = before.getClass().getDeclaredField(fieldName);
-                        field.setAccessible(true);
-                        Object value = field.get(before);
-                        String valueAsString = OBJECT_MAPPER.writeValueAsString(value);
-                        Class<?> type = declaredField.getType();
-                        Object o = OBJECT_MAPPER.readValue(valueAsString, type);
-                        declaredField.set(after, o);
-                    }
+                    checkSourceFieldAnnotation(before, after, declaredField);
+                    checkFromFieldAnnotation(before, after, declaredField);
                 }
                 if (!declaredField.getType().getName().startsWith("java") && !declaredField.getType().isEnum()) {
-                    String name = declaredField.getName();
+                    String name;
+                    if (declaredField.getAnnotation(SourceField.class) != null) {
+                        name = declaredField.getAnnotation(SourceField.class).name();
+                    } else {
+                        name = declaredField.getName();
+                    }
                     Field field = before.getClass().getDeclaredField(name);
                     field.setAccessible(true);
                     Object value = field.get(before);
@@ -90,5 +92,72 @@ public class BeanConventUtils {
             }
         }
         return after;
+    }
+
+    private static <A, B> void checkSourceFieldAnnotation(B before, A after, Field declaredField) {
+        SourceField annotation = declaredField.getAnnotation(SourceField.class);
+        try {
+            if (annotation != null) {
+                String fieldName = annotation.name();
+                Field field = before.getClass().getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = field.get(before);
+                setValue(after, declaredField, value);
+            }
+        } catch (Exception e) {
+            if (annotation.nullable()) {
+                log.warn("SourceField字段转换失败", e);
+                return;
+            }
+            log.error("SourceField字段转换失败", e);
+            throw new BeanConventException(e);
+        }
+    }
+
+    private static <A, B> void checkFromFieldAnnotation(B before, A after, Field declaredField) {
+        FromField annotation = declaredField.getAnnotation(FromField.class);
+        try {
+            if (annotation != null) {
+                String fieldName = annotation.fieldPath();
+                Object fieldValue = getFieldValueByPath(before, fieldName);
+                setValue(after, declaredField, fieldValue);
+            }
+        } catch (Exception e) {
+            if (annotation.nullable()) {
+                log.warn("FromField字段转换失败", e);
+                return;
+            }
+            log.error("FromField字段转换失败", e);
+            throw new BeanConventException(e);
+        }
+    }
+
+    private static <A> void setValue(A after, Field declaredField, Object fieldValue) {
+        try {
+            String valueAsString = OBJECT_MAPPER.writeValueAsString(fieldValue);
+            Class<?> type = declaredField.getType();
+            Object o = OBJECT_MAPPER.readValue(valueAsString, type);
+            declaredField.set(after, o);
+        } catch (Exception e) {
+            log.error("字段转换失败", e);
+            throw new BeanConventException(e);
+        }
+    }
+
+    private static <B> Object getFieldValueByPath(B before, String fieldName) {
+        String[] split = fieldName.split("\\.");
+        Field field;
+        Object value = before;
+        for (String s : split) {
+            try {
+                field = value.getClass().getDeclaredField(s);
+                field.setAccessible(true);
+                value = field.get(value);
+            } catch (Exception e) {
+                log.error("获取指定字段失败", e);
+                throw new BeanConventException(e);
+            }
+        }
+        return value;
     }
 }

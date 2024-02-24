@@ -8,12 +8,14 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SourceField {
+public @interface FromField {
     /**
-     * 原始字段名
-     * @return 原始字段名
+     * 原来对象中的字段路径
+     * 根据路径获取原来对象中的字段值，并赋值给当前字段
+     *
+     * @return 原来对象中的字段路径
      */
-    String name() default "";
+    String fieldPath() default "";
 
     /**
      * 是否允许为空
