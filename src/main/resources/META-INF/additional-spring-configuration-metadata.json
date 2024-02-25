@@ -1,0 +1,29 @@
+{
+  "properties": [
+    {
+      "name": "converter.type",
+      "type": "java.lang.String",
+      "description": "设置转换器类型.",
+      "defaultValue": "jackson"
+    }
+  ],
+  "hints": [
+    {
+      "name": "converter.type",
+      "values": [
+        {
+          "value": "fastjson",
+          "description": "使用fastjson作为默认转换器."
+        },
+        {
+          "value": "fastjson2",
+          "description": "使用fastjson2作为默认转换器."
+        },
+        {
+          "value": "jackson",
+          "description": "使用jackson作为默认转换器."
+        }
+      ]
+    }
+  ]
+}

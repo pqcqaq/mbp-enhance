@@ -6,7 +6,7 @@
 
     <groupId>online.zust.qcqcqc.utils</groupId>
     <artifactId>mbp-enhance</artifactId>
-    <version>1.3.4</version>
+    <version>1.3.5</version>
     <name>mbp-enhance-spring-boot-starter</name>
     <description>更好用的注解处理库和类型转换工具</description>
     <url>https://github.com/pqcqaq/mbp-enhance</url>
