@@ -8,13 +8,12 @@ import com.alibaba.fastjson.serializer.ValueFilter;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import online.zust.qcqcqc.utils.config.JsonConverter;
-import online.zust.qcqcqc.utils.config.condition.FastJsonCondition;
 import online.zust.qcqcqc.utils.conventer.deserializer.DateDeserializer;
 import online.zust.qcqcqc.utils.conventer.deserializer.LocalDatetimeDeserializer;
 import online.zust.qcqcqc.utils.conventer.serializer.BigDecimalSerialize;
 import online.zust.qcqcqc.utils.conventer.serializer.DateSerializer;
 import online.zust.qcqcqc.utils.conventer.serializer.LocalDateTimeSerializer;
-import org.springframework.context.annotation.Conditional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -26,7 +25,7 @@ import java.util.Date;
  * @author qcqcqc
  */
 @Component
-@Conditional(FastJsonCondition.class)
+@ConditionalOnProperty(prefix = "converter", name = "type", havingValue = "fastjson")
 public class FastJsonConverter implements JsonConverter {
 
     static {
