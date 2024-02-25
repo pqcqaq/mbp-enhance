@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serial;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -148,11 +149,40 @@ public class BeanConventUtils {
         String[] split = fieldName.split("\\.");
         Field field;
         Object value = before;
+        boolean valueIsList = false;
         for (String s : split) {
             try {
-                field = value.getClass().getDeclaredField(s);
-                field.setAccessible(true);
-                value = field.get(value);
+                if (s.startsWith("$")) {
+                    // value is List<genericType>
+                    String trueFieldName = s.substring(1);
+                    if (value instanceof List<?> list) {
+                        if (list.isEmpty()) {
+                            return null;
+                        }
+                        value = list.stream().map(o -> {
+                            if (o == null) {
+                                return null;
+                            }
+                            // 如果还是List<genericType>类型,则获取genericType的字段,达到最后结果为List<List<List....>>的情况
+                            if (o instanceof List<?> inlineLists) {
+                                return inlineLists.stream().map(inlineList -> getFieldValueByPath(inlineList, trueFieldName)).toList();
+                            }
+                            return getFieldValueByPath(o, trueFieldName);
+                        }).toList();
+                        valueIsList = true;
+                    } else {
+                        throw new BeanConventException(new RuntimeException("字段类型不在List中"));
+                    }
+                } else {
+                    if (valueIsList) {
+                        List<?> list = (List<?>) value;
+                        value = list.stream().map(o -> getFieldValueByPath(o, s)).toList();
+                    } else {
+                        field = value.getClass().getDeclaredField(s);
+                        field.setAccessible(true);
+                        value = field.get(value);
+                    }
+                }
             } catch (Exception e) {
                 log.error("获取指定字段失败", e);
                 throw new BeanConventException(e);
