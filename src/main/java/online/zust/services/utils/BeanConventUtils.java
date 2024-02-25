@@ -1,12 +1,9 @@
 package online.zust.services.utils;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import online.zust.services.annotation.convent.CustomConvent;
 import online.zust.services.annotation.convent.FromField;
 import online.zust.services.annotation.convent.SourceField;
-import online.zust.services.config.ConventConfig;
+import online.zust.services.config.JsonConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.io.Serial;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author qcqcqc
@@ -25,17 +21,11 @@ public class BeanConventUtils {
 
     private static final Logger log = LoggerFactory.getLogger(BeanConventUtils.class);
 
-    public static ObjectMapper OBJECT_MAPPER;
+    private static JsonConverter jsonConverter;
 
     @Autowired
-    public BeanConventUtils(Map<String, ConventConfig> conventConfigMaps) {
-        OBJECT_MAPPER = new ObjectMapper();
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        OBJECT_MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        conventConfigMaps.forEach((k, v) -> {
-            log.info("加载转换模块: {}", k);
-            OBJECT_MAPPER.registerModule(v.getConventionModule());
-        });
+    public void setJsonConverter(JsonConverter jsonConverter) {
+        BeanConventUtils.jsonConverter = jsonConverter;
     }
 
     public final static class BeanConventException extends RuntimeException {
@@ -52,7 +42,7 @@ public class BeanConventUtils {
             return null;
         }
         try {
-            T t = OBJECT_MAPPER.convertValue(entity, clazz);
+            T t = jsonConverter.convertValue(entity, clazz);
             if (clazz.getAnnotation(CustomConvent.class) == null) {
                 return t;
             }
@@ -63,6 +53,9 @@ public class BeanConventUtils {
     }
 
     public static <A, B> A fieldConvent(B before, A after) {
+        if (after == null) {
+            return null;
+        }
         Field[] declaredFields = after.getClass().getDeclaredFields();
         // 获取有指定注解并且为null的字段
         for (Field declaredField : declaredFields) {
@@ -135,12 +128,11 @@ public class BeanConventUtils {
 
     private static <A> void setValue(A after, Field declaredField, Object fieldValue) {
         try {
-            String valueAsString = OBJECT_MAPPER.writeValueAsString(fieldValue);
-            Class<?> type = declaredField.getType();
-            Object o = OBJECT_MAPPER.readValue(valueAsString, type);
+            declaredField.setAccessible(true);
+            Object o = jsonConverter.convertValue(fieldValue, declaredField.getType());
             declaredField.set(after, o);
         } catch (Exception e) {
-            log.error("字段转换失败", e);
+            log.error("字段设置失败", e);
             throw new BeanConventException(e);
         }
     }
