@@ -82,7 +82,7 @@ public class FastJsonConverter implements JsonConverter {
 
     @Override
     public <M, T> T convertValue(M entity, Class<T> clazz) {
-        String jsonString = JSON.toJSONString(entity);
-        return JSON.parseObject(jsonString, clazz);
+        // 对象类型转换
+        return JSON.parseObject(JSON.toJSONString(entity), clazz);
     }
 }

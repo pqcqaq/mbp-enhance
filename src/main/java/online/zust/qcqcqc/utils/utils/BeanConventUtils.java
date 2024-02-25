@@ -240,6 +240,9 @@ public class BeanConventUtils {
         Object value = before;
         for (String s : split) {
             try {
+                if (value == null) {
+                    return null;
+                }
                 // 如果是递归进来的，存在可能是List<genericType>类型，还需要进行判断
                 if (s.startsWith("$")) {
                     log.debug("已指定从数组中获取字段路径为{}", s);
