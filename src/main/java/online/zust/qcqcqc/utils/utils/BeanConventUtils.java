@@ -285,4 +285,20 @@ public class BeanConventUtils {
         }).toList();
         return value;
     }
+
+    /**
+     * 复制属性并返回新对象
+     *
+     * @param target 目标类型
+     * @param source 源对象
+     * @param <T>    目标类型
+     * @return 目标类型对象
+     */
+    public static <T> T copyProperties(Class<T> target, Object... source) {
+        T t = objectConvent(source[0], target);
+        for (int i = 1; i < source.length; i++) {
+            fieldConvent(source[i], t, true);
+        }
+        return t;
+    }
 }
