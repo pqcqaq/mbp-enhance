@@ -238,27 +238,8 @@ public class BeanConventUtils {
         String[] split = fieldName.split("\\.");
         Field field;
         Object value = before;
-        // 一旦尝试从List中获取字段,则valueIsList为true,后续字段获取都会从List中获取，并处理为List
-//        boolean valueIsList = false;
         for (String s : split) {
             try {
-//                if (s.startsWith("$")) {
-//                    // value is List<genericType>
-//                    String trueFieldName = s.substring(1);
-//                    if (value instanceof List<?> list) {
-//                        if (list.isEmpty()) {
-//                            return null;
-//                        }
-//                        value = getObjectInList(list, trueFieldName);
-//                        valueIsList = true;
-//                    } else {
-//                        throw new BeanConventException(new RuntimeException("字段类型不在List中"));
-//                    }
-//                } else {
-//                    if (valueIsList) {
-//                        List<?> list = (List<?>) value;
-//                        value = list.stream().map(o -> getFieldValueByPath(o, s)).toList();
-//                    } else {
                 // 如果是递归进来的，存在可能是List<genericType>类型，还需要进行判断
                 if (s.startsWith("$")) {
                     log.debug("已指定从数组中获取字段路径为{}", s);
@@ -271,8 +252,6 @@ public class BeanConventUtils {
                     field = value.getClass().getDeclaredField(s);
                     field.setAccessible(true);
                     value = field.get(value);
-//                        }
-//                    }
                 }
             } catch (Exception e) {
                 log.error("获取指定字段失败", e);
