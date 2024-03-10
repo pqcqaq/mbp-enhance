@@ -27,6 +27,11 @@ import java.util.Date;
 @Component
 @ConditionalOnProperty(prefix = "converter", name = "type", havingValue = "fastjson")
 public class FastJsonConverter implements JsonConverter {
+    private static final FastJsonConverter INSTANCE = new FastJsonConverter();
+
+    public static FastJsonConverter getInstance() {
+        return INSTANCE;
+    }
 
     static {
         FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
@@ -83,5 +88,11 @@ public class FastJsonConverter implements JsonConverter {
     public <M, T> T convertValue(M entity, Class<T> clazz) {
         // 对象类型转换
         return JSON.parseObject(JSON.toJSONString(entity), clazz);
+    }
+
+    @Override
+    public <T> T fromString(String entity, Class<T> clazz) {
+        // 字符串转对象
+        return JSON.parseObject(entity, clazz);
     }
 }

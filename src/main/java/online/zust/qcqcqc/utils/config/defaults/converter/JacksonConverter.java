@@ -3,9 +3,10 @@ package online.zust.qcqcqc.utils.config.defaults.converter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import online.zust.qcqcqc.utils.config.ConventConfig;
 import online.zust.qcqcqc.utils.config.JsonConverter;
+import online.zust.qcqcqc.utils.config.defaults.DefaultConventConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,16 @@ import java.util.Map;
 public class JacksonConverter implements JsonConverter {
     private static final Logger log = LoggerFactory.getLogger(JacksonConverter.class);
     public static ObjectMapper OBJECT_MAPPER;
+    private static final JacksonConverter INSTANCE;
+
+    static {
+        DefaultConventConfig defaultConventConfig = new DefaultConventConfig();
+        INSTANCE = new JacksonConverter(Map.of("default", defaultConventConfig));
+    }
+
+    public static JacksonConverter getInstance() {
+        return INSTANCE;
+    }
 
     @Autowired
     public JacksonConverter(Map<String, ConventConfig> conventConfigMaps) {
@@ -37,5 +48,15 @@ public class JacksonConverter implements JsonConverter {
     @Override
     public <M, T> T convertValue(M entity, Class<T> clazz) {
         return OBJECT_MAPPER.convertValue(entity, clazz);
+    }
+
+    @Override
+    public <T> T fromString(String entity, Class<T> clazz) {
+        try {
+            return OBJECT_MAPPER.readValue(entity, clazz);
+        } catch (Exception e) {
+            log.error("解析json失败", e);
+            return null;
+        }
     }
 }

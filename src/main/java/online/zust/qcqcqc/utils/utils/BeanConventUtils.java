@@ -25,6 +25,14 @@ public class BeanConventUtils {
 
     @Autowired
     public void setJsonConverter(JsonConverter jsonConverter) {
+        initJsonConverter(jsonConverter);
+    }
+
+    /**
+     * 初始化json转换器
+     * @param jsonConverter json转换器
+     */
+    public static void initJsonConverter(JsonConverter jsonConverter) {
         BeanConventUtils.jsonConverter = jsonConverter;
     }
 
@@ -63,6 +71,21 @@ public class BeanConventUtils {
         } catch (Exception e) {
             throw new BeanConventException(e);
         }
+    }
+
+    /**
+     * 字符串转换为对象
+     *
+     * @param entity 字符串
+     * @param clazz  目标类型
+     * @param <T>    目标类型
+     * @return 目标类型对象
+     */
+    public static <T> T objectConvent(String entity, Class<T> clazz) {
+        if (entity == null) {
+            return null;
+        }
+        return jsonConverter.fromString(entity, clazz);
     }
 
     /**

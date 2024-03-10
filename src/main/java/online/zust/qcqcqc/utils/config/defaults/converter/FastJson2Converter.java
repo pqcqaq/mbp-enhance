@@ -15,6 +15,12 @@ import java.nio.charset.StandardCharsets;
 @Component
 @ConditionalOnProperty(prefix = "converter", name = "type", havingValue = "fastjson2")
 public class FastJson2Converter implements JsonConverter {
+    private static final FastJson2Converter INSTANCE = new FastJson2Converter();
+
+    public static FastJson2Converter getInstance() {
+        return INSTANCE;
+    }
+
     static {
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
         fastJsonConfig.setDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -32,5 +38,10 @@ public class FastJson2Converter implements JsonConverter {
     @Override
     public <M, T> T convertValue(M entity, Class<T> clazz) {
         return JSON.parseObject(JSON.toJSONString(entity), clazz);
+    }
+
+    @Override
+    public <T> T fromString(String entity, Class<T> clazz) {
+        return JSON.parseObject(entity, clazz);
     }
 }
