@@ -155,7 +155,12 @@ public class BeanConvertUtils {
                             field.setAccessible(true);
                             List<?> listValue = (List<?>) field.get(before);
                             // 判断原始对象中的字段是否为空，如果为空则直接略过
-                            if (listValue == null || listValue.isEmpty()) {
+                            if (listValue == null) {
+                                // 如果走到了这一步，则一定是不包含深层指定的一个简单数组转换，如果直接是null，那么目标对象肯定需要一个空数组（目标对象不一定是null，可能存在字段重复，这里直接进行覆盖）
+                                declaredField.set(after, List.of());
+                                continue;
+                            }
+                            if (listValue.isEmpty()) {
                                 continue;
                             }
                             // 判断是不是基本类型(原始对象中)
@@ -164,16 +169,9 @@ public class BeanConvertUtils {
                                 // 如果是基本类型，直接略过，因为最开始做转换的时候肯定已经有值了（上面处理自定义注解时赋值）
                                 continue;
                             }
-                            if (list == null){
-                                log.warn("目标对象字段{}为空可能存在对象类型不匹配！拒绝转换字段：{}", declaredField.getName(), field.getName());
-                                // 设置为空数组
-                                declaredField.set(after, List.of());
-                                continue;
-                            }
-                            if (listValue.size() != list.size()) {
-                                log.warn("List字段长度不一致，无法进行转换");
-                                continue;
-                            }
+
+                            // 这里不需要在判断是否为null了，因为前面已经赋值为了一个空数组
+                            // 也不需要判断是否长度不相等了，因为可能原始已经赋值，这里需要覆盖掉
                             // 如果字段值不为null,则将原始对象和目标对象的List进行遍历递归赋值
                             log.debug("尝试转换List字段，从原始对象字段{}转换到目标对象字段{}", field.getName(), declaredField.getName());
                             // 如果字段值不为null,则进行递归赋值
