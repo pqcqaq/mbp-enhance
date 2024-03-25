@@ -145,7 +145,11 @@ public class BeanConvertUtils {
                             // 检查原始数据中是否有字段
                             // 转为数组并进行递归赋值
                             List<?> list = (List<?>) declaredField.get(after);
-                            if (list != null) {
+                            if (list != null ) {
+                                //TODO:这里要仔细看看
+                                if (list.isEmpty()) {
+                                    continue;
+                                }
                                 // 判断是不是基本类型
                                 Object o = list.get(0);
                                 if (o == null || o.getClass().getName().startsWith("java")) {
