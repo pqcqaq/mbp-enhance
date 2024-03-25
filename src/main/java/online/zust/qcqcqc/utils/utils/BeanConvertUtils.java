@@ -166,6 +166,8 @@ public class BeanConvertUtils {
                             }
                             if (list == null){
                                 log.warn("目标对象字段{}为空可能存在对象类型不匹配！拒绝转换字段：{}", declaredField.getName(), field.getName());
+                                // 设置为空数组
+                                declaredField.set(after, List.of());
                                 continue;
                             }
                             if (listValue.size() != list.size()) {
