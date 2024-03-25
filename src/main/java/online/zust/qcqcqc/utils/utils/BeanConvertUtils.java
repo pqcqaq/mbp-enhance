@@ -112,7 +112,7 @@ public class BeanConvertUtils {
             }
             if (declaredField.getAnnotation(RequireDefault.class) != null) {
                 setDefaultValue(after, declaredField);
-            }else {
+            } else {
                 // 如果不是设值默认值，则根据注解进行赋值
                 try {
                     declaredField.setAccessible(true);
@@ -145,35 +145,39 @@ public class BeanConvertUtils {
                             // 检查原始数据中是否有字段
                             // 转为数组并进行递归赋值
                             List<?> list = (List<?>) declaredField.get(after);
-                            if (list != null ) {
-                                //TODO:这里要仔细看看
-                                if (list.isEmpty()) {
-                                    continue;
-                                }
-                                // 判断是不是基本类型
-                                Object o = list.get(0);
-                                if (o == null || o.getClass().getName().startsWith("java")) {
-                                    // 如果是基本类型，直接略过，因为最开始做转换的时候肯定已经有值了（上面处理自定义注解时赋值）
-                                    continue;
-                                }
-                                // 在原始对象中查找同名的字段或者根据注解查找字段
-                                String name = getFieldNameFromAnnotation(declaredField, nullable);
-                                // 如果没有注解或者是采用深层次查找，则直接略过，因为在上面已经处理过了
-                                if (name == null || name.contains(".")) {
-                                    continue;
-                                }
-                                Field field = before.getClass().getDeclaredField(name);
-                                field.setAccessible(true);
-                                List<?> listValue = (List<?>) field.get(before);
-                                // 如果字段值不为null,则将原始对象和目标对象的List进行遍历递归赋值
-                                log.debug("尝试转换List字段，从原始对象字段{}转换到目标对象字段{}", field.getName(), declaredField.getName());
-                                // 如果字段值不为null,则进行递归赋值
-                                if (listValue != null) {
-                                    for (int i = 0; i < list.size(); i++) {
-                                        fieldConvent(listValue.get(i), list.get(i), nullable);
-                                    }
-                                }
+                            // 在原始对象中查找同名的字段或者根据注解查找字段
+                            String name = getFieldNameFromAnnotation(declaredField, nullable);
+                            // 如果没有注解或者是采用深层次查找，则直接略过，因为在上面已经处理过了
+                            if (name == null || name.contains(".")) {
+                                continue;
                             }
+                            Field field = before.getClass().getDeclaredField(name);
+                            field.setAccessible(true);
+                            List<?> listValue = (List<?>) field.get(before);
+                            // 判断原始对象中的字段是否为空，如果为空则直接略过
+                            if (listValue == null || listValue.isEmpty()) {
+                                continue;
+                            }
+                            // 判断是不是基本类型(原始对象中)
+                            Object o = listValue.get(0);
+                            if (o == null || o.getClass().getName().startsWith("java")) {
+                                // 如果是基本类型，直接略过，因为最开始做转换的时候肯定已经有值了（上面处理自定义注解时赋值）
+                                continue;
+                            }
+                            if (list == null){
+                                log.warn("目标对象字段{}为空可能存在对象类型不匹配！拒绝转换字段：{}", declaredField.getName(), field.getName());
+                                continue;
+                            }
+                            if (listValue.size() != list.size()) {
+                                log.warn("List字段长度不一致，无法进行转换");
+                                continue;
+                            }
+                            // 如果字段值不为null,则将原始对象和目标对象的List进行遍历递归赋值
+                            log.debug("尝试转换List字段，从原始对象字段{}转换到目标对象字段{}", field.getName(), declaredField.getName());
+                            // 如果字段值不为null,则进行递归赋值
+                            Class<?> targetClass = list.get(0).getClass();
+                            List<?> list1 = listValue.stream().map(item -> objectConvent(item, targetClass)).toList();
+                            declaredField.set(after, list1);
                         }
                     }
                 } catch (Exception e) {
@@ -187,9 +191,10 @@ public class BeanConvertUtils {
 
     /**
      * 设置默认值
-     * @param after 目标对象
+     *
+     * @param after         目标对象
      * @param declaredField 字段
-     * @param <A> 目标对象类型
+     * @param <A>           目标对象类型
      */
     private static <A> void setDefaultValue(A after, Field declaredField) {
         RequireDefault annotation = declaredField.getAnnotation(RequireDefault.class);
