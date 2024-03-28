@@ -2,6 +2,7 @@ package online.zust.qcqcqc.utils.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
  * 主要用于解决自调用问题
  */
 @Component
-public class ProxyUtil {
+public class ProxyUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 

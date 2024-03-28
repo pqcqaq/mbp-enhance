@@ -263,6 +263,8 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         if (value instanceof Long l) {
             List<?> list = bean.list(new QueryWrapper<>().eq(baseId, l), deep - 1);
             declaredField.set(entity, list);
+        } else {
+            log.error("字段值不是Long类型，无法作为id查询");
         }
     }
 
@@ -369,6 +371,8 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             // 获取service的getById方法
             Object byId1 = bean.getById(l, deep - 1);
             deepSearchField.set(entity, byId1);
+        } else {
+            log.error("字段值不是Long类型，无法作为id查询");
         }
     }
 
