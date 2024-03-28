@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serial;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -163,6 +164,11 @@ public class BeanConvertUtils {
                             if (listValue.isEmpty()) {
                                 continue;
                             }
+                            // 原数组有数据且不为空，目标数组为null的情况，直接赋值为一个空数组
+                            if (list == null) {
+                                declaredField.set(after, List.of());
+                                continue;
+                            }
                             // 判断是不是基本类型(原始对象中)
                             Object o = listValue.get(0);
                             if (o == null || o.getClass().getName().startsWith("java")) {
@@ -175,7 +181,15 @@ public class BeanConvertUtils {
                             // 如果字段值不为null,则将原始对象和目标对象的List进行遍历递归赋值
                             log.debug("尝试转换List字段，从原始对象字段{}转换到目标对象字段{}", field.getName(), declaredField.getName());
                             // 如果字段值不为null,则进行递归赋值
-                            Class<?> targetClass = list.get(0).getClass();
+                            Class<?> targetClass;
+                            if (!list.isEmpty()) {
+                                // 从第一个元素中获取
+                                targetClass = list.get(0).getClass();
+                            } else {
+                                // 从数组的泛型信息中获取，而不是从第一个元素中获取
+                                Type genericType = declaredField.getGenericType();
+                                targetClass = genericType.getClass();
+                            }
                             List<?> list1 = listValue.stream().map(item -> objectConvent(item, targetClass)).toList();
                             declaredField.set(after, list1);
                         }
