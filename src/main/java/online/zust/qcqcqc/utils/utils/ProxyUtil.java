@@ -17,6 +17,7 @@ public class ProxyUtil implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
     @Autowired
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         ProxyUtil.applicationContext = applicationContext;
     }

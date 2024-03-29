@@ -4,37 +4,30 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<E>> {
 
     public EntityInfo() {
-        this.previous = new ArrayList<>();
+        this.previous = new HashSet<>();
         this.entityClass = null;
         this.service = null;
-        this.next = new ArrayList<>();
+        this.next = new HashSet<>();
     }
 
-    private List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous;
+    private Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous;
     private Class<E> entityClass;
     private S service;
-    private List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> next;
+    private Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> next;
 
-    public List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getPrevious() {
+    public Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getPrevious() {
         return previous;
     }
 
-    public void setPrevious(List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous) {
-        this.previous = previous;
-    }
-
-    public List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getNext() {
+    public Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getNext() {
         return next;
-    }
-
-    public void setNext(List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> next) {
-        this.next = next;
     }
 
     public Class<E> getEntityClass() {
@@ -70,7 +63,7 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
         visited.add(entityInfo);
 
         // 获取下一个节点列表
-        List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> nextNodes = entityInfo.getNext();
+        Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> nextNodes = entityInfo.getNext();
 
         // 递归打印下一个节点
         for (EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> nextNode : nextNodes) {

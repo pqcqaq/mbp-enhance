@@ -43,7 +43,7 @@ public class EntityRelaRegister {
     private static void addRelaToTree() {
         // find no previous entity and add it to the root
         EntityRelation.entityInfoMap.forEach((entityClass, entityInfo) -> {
-            List<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous = entityInfo.getPrevious();
+            Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous = entityInfo.getPrevious();
             if (previous.isEmpty()) {
                 EntityRelation.BaseEntity.getNext().add(entityInfo);
                 entityInfo.getPrevious().add(EntityRelation.BaseEntity);
