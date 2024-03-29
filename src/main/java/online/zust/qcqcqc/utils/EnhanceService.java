@@ -382,7 +382,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             Object byId1 = bean.getById(l, deep - 1);
             deepSearchField.set(entity, byId1);
         } else {
-            log.error("字段值不是Long类型，无法作为id查询");
+            log.error("字段: "+ declaredField.getName() +" 值不是Long类型，无法作为id查询");
         }
     }
 

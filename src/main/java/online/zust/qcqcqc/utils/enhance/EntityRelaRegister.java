@@ -22,7 +22,7 @@ import java.util.Set;
 @Component
 public class EntityRelaRegister {
     private static List<EnhanceService<?, ?>> enhanceServiceList;
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(EntityRelaRegister.class);
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(EntityRelaRegister.class);
 
     public EntityRelaRegister(List<EnhanceService<?, ?>> enhanceServiceList) {
         EntityRelaRegister.enhanceServiceList = enhanceServiceList;
@@ -37,7 +37,9 @@ public class EntityRelaRegister {
 
     private void printEntityTree() {
         Set<EntityInfo<?, ?, ?>> visited = new HashSet<>();
-        EntityInfo.printEntityTree(EntityRelation.BaseEntity, 0, visited);
+        System.out.println("------------------Entity Tree:------------------");
+        EntityRelation.printEntityTree(EntityRelation.BaseEntity, 0, visited);
+        System.out.println("------------------------------------------------");
     }
 
     private static void addRelaToTree() {
