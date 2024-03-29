@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface CustomConvent {
+public @interface CustomConvert {
     /**
      * 是否允许为空
      * @return 是否允许为空
