@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
+import online.zust.qcqcqc.utils.enhance.EntityRelaRegister;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
 import online.zust.qcqcqc.utils.utils.ProxyUtil;
 import org.apache.ibatis.binding.MapperMethod;
@@ -24,6 +25,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +41,7 @@ import java.util.function.Function;
  * @author qcqcqc
  */
 @SuppressWarnings("all")
-public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhance<T> {
+public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhance<T>, InitializingBean {
 
     private final int DEEP = 9;
 
@@ -56,6 +58,14 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
     @Override
     public Class<T> getEntityClass() {
         return entityClass;
+    }
+
+    public Class<? extends EnhanceService> getSelfClass(){
+        return getClass();
+    }
+
+    public EnhanceService<?,?> getBean(){
+        return ProxyUtil.getBean(getClass());
     }
 
 
@@ -400,4 +410,8 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         return SqlHelper.getObject(log, listObjs(queryWrapper, mapper));
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        log.debug("EnhanceService inited: " + this.getClass().getName());
+    }
 }

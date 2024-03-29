@@ -1,1 +1,7 @@
-online.zust.qcqcqc.utils.config.MbpEnhanceAutoInject
+online.zust.qcqcqc.utils.config.defaults.DefaultConventConfig
+online.zust.qcqcqc.utils.utils.BeanConvertUtils
+online.zust.qcqcqc.utils.config.defaults.converter.FastJsonConverter
+online.zust.qcqcqc.utils.config.defaults.converter.FastJson2Converter
+online.zust.qcqcqc.utils.config.defaults.converter.JacksonConverter
+online.zust.qcqcqc.utils.utils.ProxyUtil
+online.zust.qcqcqc.utils.enhance.EntityRelaRegister
