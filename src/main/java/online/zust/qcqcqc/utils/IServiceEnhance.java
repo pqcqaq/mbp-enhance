@@ -1,11 +1,14 @@
 package online.zust.qcqcqc.utils;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author qcqcqc
@@ -80,4 +83,42 @@ public interface IServiceEnhance<T> extends IService<T> {
      * @return 查询结果
      */
     T getDeepSearch(T entity, int deep);
+
+    /**
+     * 进行依赖检查
+     * @param id 主键ID
+     */
+    void doCheckDependency(Serializable id) throws DependencyCheckException;
+
+    /**
+     * 进行依赖检查
+     * @param entity 实体
+     */
+    void doCheckDependency(T entity);
+
+
+    /**
+     * 根据id删除
+     *
+     * @param id 主键ID
+     * @return 是否成功
+     */
+    @Override
+    default boolean removeById(Serializable id) {
+        doCheckDependency(id);
+        return IService.super.removeById(id);
+    }
+
+    /**
+     * 根据id删除
+     *
+     * @param entity 实体
+     * @return 是否成功
+     */
+    @Override
+    default boolean removeById(T entity) {
+        doCheckDependency(entity);
+        return IService.super.removeById(entity);
+    }
+
 }

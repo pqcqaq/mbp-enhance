@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
+import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
 import online.zust.qcqcqc.utils.utils.ProxyUtil;
 import org.apache.ibatis.binding.MapperMethod;
@@ -243,6 +244,16 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             }
         }
         return entity;
+    }
+
+    @Override
+    public void doCheckDependency(Serializable id) throws DependencyCheckException {
+
+    }
+
+    @Override
+    public void doCheckDependency(T entity) {
+
     }
 
     private void handleOtMAnnotation(T entity, Field declaredField, Class<?> aClass, int deep) {
