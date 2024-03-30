@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
-import online.zust.qcqcqc.utils.enhance.EntityRelaRegister;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
 import online.zust.qcqcqc.utils.utils.ProxyUtil;
 import org.apache.ibatis.binding.MapperMethod;
@@ -60,11 +59,11 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         return entityClass;
     }
 
-    public Class<? extends EnhanceService> getSelfClass(){
+    public Class<? extends EnhanceService> getSelfClass() {
         return getClass();
     }
 
-    public EnhanceService<?,?> getBean(){
+    public EnhanceService<?, ?> getBean() {
         return ProxyUtil.getBean(getClass());
     }
 
@@ -382,7 +381,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             Object byId1 = bean.getById(l, deep - 1);
             deepSearchField.set(entity, byId1);
         } else {
-            log.error("字段: "+ declaredField.getName() +" 值不是Long类型，无法作为id查询");
+            log.error("类: " + entity.getClass().getCanonicalName() + "中的字段: " + declaredField.getName() + " 值不是Long类型，无法作为id查询");
         }
     }
 
