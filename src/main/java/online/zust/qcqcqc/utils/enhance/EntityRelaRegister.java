@@ -7,6 +7,8 @@ import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -21,7 +23,7 @@ import java.util.Set;
  * 实体类关系注册器，由此将entity关联注册到关联表中
  */
 @Component
-public class EntityRelaRegister {
+public class EntityRelaRegister implements DisposableBean {
     private static List<EnhanceService<?, ?>> enhanceServiceList;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(EntityRelaRegister.class);
 
@@ -100,5 +102,11 @@ public class EntityRelaRegister {
         objectEnhanceServiceBaseMapperEntityInfo.setEntityClass(entityClass);
         objectEnhanceServiceBaseMapperEntityInfo.setService(enhanceService);
         EntityRelation.entityInfoMap.put(enhanceService.getSelfClass(), objectEnhanceServiceBaseMapperEntityInfo);
+    }
+
+    @Override
+    public void destroy() {
+        EntityRelation.entityInfoMap.clear();
+        EntityRelation.BaseEntity = EntityInfo.initEmptyEntityInfo();
     }
 }
