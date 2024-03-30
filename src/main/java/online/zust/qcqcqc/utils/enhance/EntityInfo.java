@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<E>> {
@@ -13,6 +14,19 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
         this.entityClass = null;
         this.service = null;
         this.next = new HashSet<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EntityInfo<?, ?, ?> that = (EntityInfo<?, ?, ?>) o;
+        return Objects.equals(entityClass, that.entityClass) && Objects.equals(service, that.service);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityClass, service);
     }
 
     private final Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous;
