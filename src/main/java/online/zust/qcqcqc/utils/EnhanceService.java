@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
+import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
 import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
 import online.zust.qcqcqc.utils.utils.ProxyUtil;
@@ -248,12 +249,27 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
 
     @Override
     public void doCheckDependency(Serializable id) throws DependencyCheckException {
-
+        CheckHandler.doCheck(this, id);
     }
 
     @Override
-    public void doCheckDependency(T entity) {
-
+    public void doCheckDependency(T entity) throws DependencyCheckException {
+        if (entity.getClass().getPackageName().startsWith("java")) {
+            doCheckDependency((Serializable) entity);
+        } else {
+            Field[] declaredFields = entity.getClass().getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                if (declaredField.isAnnotationPresent(TableId.class)) {
+                    declaredField.setAccessible(true);
+                    try {
+                        doCheckDependency((Serializable) declaredField.get(entity));
+                    } catch (IllegalAccessException e) {
+                        throw new DependencyCheckException(e.getMessage());
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private void handleOtMAnnotation(T entity, Field declaredField, Class<?> aClass, int deep) {

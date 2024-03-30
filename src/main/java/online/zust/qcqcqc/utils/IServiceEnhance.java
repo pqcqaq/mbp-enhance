@@ -94,7 +94,7 @@ public interface IServiceEnhance<T> extends IService<T> {
      * 进行依赖检查
      * @param entity 实体
      */
-    void doCheckDependency(T entity);
+    void doCheckDependency(T entity) throws DependencyCheckException;
 
 
     /**

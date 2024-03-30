@@ -20,6 +20,14 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
     private S service;
     private final Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> next;
 
+    public void addPrevious(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
+        previous.add(entityInfo);
+    }
+
+    public void addNext(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
+        next.add(entityInfo);
+    }
+
     public Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getPrevious() {
         return previous;
     }

@@ -2,6 +2,7 @@ package online.zust.qcqcqc.utils.annotation;
 
 
 import online.zust.qcqcqc.utils.EnhanceService;
+import online.zust.qcqcqc.utils.enhance.searcher.DeepSearchHandler;
 
 import java.lang.annotation.*;
 

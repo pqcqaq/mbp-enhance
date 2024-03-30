@@ -1,5 +1,6 @@
 package online.zust.qcqcqc.utils.enhance;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
@@ -64,8 +65,8 @@ public class EntityRelaRegister {
                     OtODeepSearch annotation = declaredField.getAnnotation(OtODeepSearch.class);
                     Class<? extends EnhanceService> service = annotation.service();
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo1 = EntityRelation.entityInfoMap.get(service);
-                    entityInfo1.getPrevious().add(entityInfo);
-                    entityInfo.getNext().add(entityInfo1);
+                    entityInfo1.addPrevious(entityInfo);
+                    entityInfo.addNext(entityInfo1);
                 }
 
                 if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
@@ -73,8 +74,8 @@ public class EntityRelaRegister {
                     OtMDeepSearch annotation = declaredField.getAnnotation(OtMDeepSearch.class);
                     Class<? extends EnhanceService> service = annotation.service();
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo1 = EntityRelation.entityInfoMap.get(service);
-                    entityInfo1.getPrevious().add(entityInfo);
-                    entityInfo.getNext().add(entityInfo1);
+                    entityInfo1.addPrevious(entityInfo);
+                    entityInfo.addNext(entityInfo1);
                 }
 
                 if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
@@ -85,10 +86,10 @@ public class EntityRelaRegister {
                     Class<? extends EnhanceService> targetService = annotation.targetService();
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo1 = EntityRelation.entityInfoMap.get(relaService);
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo2 = EntityRelation.entityInfoMap.get(targetService);
-                    entityInfo1.getPrevious().add(entityInfo);
-                    entityInfo.getNext().add(entityInfo1);
-                    entityInfo2.getPrevious().add(entityInfo1);
-                    entityInfo1.getNext().add(entityInfo2);
+                    entityInfo1.addPrevious(entityInfo);
+                    entityInfo.addNext(entityInfo1);
+                    entityInfo2.addPrevious(entityInfo1);
+                    entityInfo1.addNext(entityInfo2);
                 }
             }
         });
