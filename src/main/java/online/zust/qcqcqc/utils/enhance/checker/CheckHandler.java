@@ -65,8 +65,8 @@ public class CheckHandler {
         field = FieldNameConvertUtils.camelToUnderline(field);
         QueryWrapper objectQueryWrapper = new QueryWrapper();
         objectQueryWrapper.eq(field, id);
-        Object one = service1.getOne(objectQueryWrapper);
-        if (one != null) {
+        List<Object> list = service1.list(objectQueryWrapper);
+        if (!list.isEmpty()) {
             MsgOnInversePointer annotation1 = declaredField.getAnnotation(MsgOnInversePointer.class);
             String msg = annotation1 == null ? "待删除的对象在类" + entityClass.getSimpleName() + "中存在依赖关系，无法删除" : annotation1.value();
             throw new DependencyCheckException(msg);
