@@ -36,9 +36,10 @@ public class EntityRelaRegister {
     }
 
     private void printEntityTree() {
-        Set<EntityInfo<?, ?, ?>> visited = new HashSet<>();
         System.out.println("------------------Entity Tree:------------------");
-        EntityRelation.printEntityTree(EntityRelation.BaseEntity, 0, visited);
+        EntityRelation.printEntityTree(EntityRelation.BaseEntity, 0, new HashSet<>());
+        System.out.println("-------------Entity Inverse Pointer-------------");
+        EntityRelation.printInversePointer();
         System.out.println("------------------------------------------------");
     }
 

@@ -3,11 +3,9 @@ package online.zust.qcqcqc.utils.enhance;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * @author qcqcqc
@@ -40,5 +38,14 @@ public class EntityRelation {
                 System.out.println("  (Cycle Detected: " + nextNode.getEntityClass().getSimpleName() + ")");
             }
         }
+    }
+
+    public static void printInversePointer() {
+        entityInfoMap.forEach((serviceClass, entityInfo) -> {
+            System.out.print(entityInfo.getEntityClass().getSimpleName());
+            System.out.print("->");
+            List<String> list = entityInfo.getPrevious().stream().map(EntityInfo::getEntityClass).map(Class::getSimpleName).toList();
+            System.out.println(list);
+        });
     }
 }
