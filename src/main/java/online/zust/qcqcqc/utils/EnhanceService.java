@@ -273,7 +273,9 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             List<?> list = bean.list(new QueryWrapper<>().eq(baseId, l), deep - 1);
             declaredField.set(entity, list);
         } else {
-            log.error("字段值不是Long类型，无法作为id查询");
+            if (value != null) {
+                log.error("类: " + entity.getClass().getCanonicalName() + "中的字段: " + declaredField.getName() + " 值不是Long类型，无法作为id查询");
+            }
         }
     }
 
@@ -331,9 +333,10 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         // 获取值declaredField的值
         declaredField.setAccessible(true);
         Object value = declaredField.get(entity);
-        if (!(value instanceof Long baseId)) {
+        if (!(value instanceof Long) && value != null) {
             throw new ErrorDeepSearchException("id字段不是Long类型");
         }
+        Long baseId = (Long) value;
         EnhanceService relaServiceImpl = ProxyUtil.getBean(relaService);
         List<Long> targetIds = relaServiceImpl.list(new QueryWrapper<>().eq(column, baseId)).stream().map(e -> {
             try {
@@ -381,7 +384,9 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             Object byId1 = bean.getById(l, deep - 1);
             deepSearchField.set(entity, byId1);
         } else {
-            log.error("类: " + entity.getClass().getCanonicalName() + "中的字段: " + declaredField.getName() + " 值不是Long类型，无法作为id查询");
+            if (value != null) {
+                log.error("类: " + entity.getClass().getCanonicalName() + "中的字段: " + declaredField.getName() + " 值不是Long类型，无法作为id查询");
+            }
         }
     }
 
