@@ -26,6 +26,10 @@ import java.util.Set;
 public class CheckHandler {
     public static <T> void doCheck(T service, Serializable id) throws DependencyCheckException {
         EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(service.getClass());
+        checkPrevious(id, entityInfo);
+    }
+
+    private static void checkPrevious(Serializable id, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
         Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous = entityInfo.getPrevious();
         previous.forEach(item -> {
             EnhanceService<? extends BaseMapper<?>, ?> service1 = item.getService();
@@ -39,14 +43,27 @@ public class CheckHandler {
                 switch (annotation.annotationType().getSimpleName()) {
                     case "OtODeepSearch" -> handleOtODeepSearch(entityClass, declaredField, service1, id);
                     case "OtMDeepSearch" -> handleOtMDeepSearch(entityClass, declaredField, service1, id);
-                    case "MtMDeepSearch" -> handleMtMDeepSearch(entityClass, declaredField, service1, id);
+                    case "MtMDeepSearch" -> handleMtMDeepSearch(declaredField, id);
                 }
             }
         });
     }
 
-    private static void handleMtMDeepSearch(Class<?> entityClass, Field declaredField, EnhanceService<? extends BaseMapper<?>, ?> service1, Serializable id) {
-
+    private static void handleMtMDeepSearch(Field declaredField, Serializable id) {
+        // TODO: 这里有问题，因为无法获取到关联表的信息，关联表里面是没有注解的
+//        MtMDeepSearch annotation = declaredField.getAnnotation(MtMDeepSearch.class);
+//        String s = annotation.targetId();
+//        if (s.trim().isEmpty()) {
+//            s = FieldNameConvertUtils.camelToUnderline(s);
+//        }
+//        Class<? extends EnhanceService> aClass = annotation.relaService();
+//        EnhanceService bean = ProxyUtil.getBean(aClass);
+//        List<Object> list = bean.list(new QueryWrapper<>().eq(s, id));
+//        if (!list.isEmpty()) {
+//            MsgOnInversePointer annotation1 = declaredField.getAnnotation(MsgOnInversePointer.class);
+//            String msg = annotation1 == null ? "待删除的对象在关系类" + bean.getEntityClass().getSimpleName() + "中存在依赖关系，无法删除" : annotation1.value();
+//            throw new DependencyCheckException(msg);
+//        }
     }
 
     private static void handleOtMDeepSearch(Class<?> entityClass, Field declaredField, EnhanceService<? extends BaseMapper<?>, ?> service1, Serializable id) {
@@ -64,7 +81,7 @@ public class CheckHandler {
         List<Object> list = service1.list(objectQueryWrapper);
         if (!list.isEmpty()) {
             MsgOnInversePointer annotation1 = declaredField.getAnnotation(MsgOnInversePointer.class);
-            String msg = annotation1 == null ? "待删除的对象在类" + entityClass.getSimpleName() + "中存在依赖关系，无法删除" : annotation1.value();
+            String msg = annotation1 == null ? "待删除的对象在类" + entityClass.getSimpleName() + "(list: " + list + ")" + "中存在依赖关系，无法删除" : annotation1.value();
             throw new DependencyCheckException(msg);
         }
     }

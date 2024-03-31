@@ -7,7 +7,6 @@ import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -23,8 +22,6 @@ import java.util.Set;
  */
 @Component
 public class EntityRelaRegister implements DisposableBean {
-    @Value("${debug:false}")
-    private Boolean debug;
     private static List<EnhanceService<?, ?>> enhanceServiceList;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(EntityRelaRegister.class);
 
@@ -36,9 +33,7 @@ public class EntityRelaRegister implements DisposableBean {
         initRelation();
         addRelaToTree();
         logger.info("实体类关联注册完成: {}", enhanceServiceList);
-        if (debug) {
-            printEntityTree();
-        }
+        printEntityTree();
     }
 
     private void printEntityTree() {
