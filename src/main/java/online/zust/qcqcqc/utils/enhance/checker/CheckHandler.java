@@ -38,12 +38,8 @@ public class CheckHandler {
                 }
                 switch (annotation.annotationType().getSimpleName()) {
                     case "OtODeepSearch" -> handleOtODeepSearch(entityClass, declaredField, service1, id);
-                    case "OtMDeepSearch" -> {
-                        handleOtMDeepSearch(entityClass, declaredField, service1, id);
-                    }
-                    case "MtMDeepSearch" -> {
-                        handleMtMDeepSearch(entityClass, declaredField, service1, id);
-                    }
+                    case "OtMDeepSearch" -> handleOtMDeepSearch(entityClass, declaredField, service1, id);
+                    case "MtMDeepSearch" -> handleMtMDeepSearch(entityClass, declaredField, service1, id);
                 }
             }
         });
