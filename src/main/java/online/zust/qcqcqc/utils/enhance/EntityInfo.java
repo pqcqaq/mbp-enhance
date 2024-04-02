@@ -8,46 +8,76 @@ import java.util.*;
 
 public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<E>> {
 
+    private final Map<EntityInfo, List<Field>> otoPreviousFieldMap;
+    private final Map<EntityInfo, List<Field>> otmPreviousFieldMap;
+    private final Map<EntityInfo, List<Field>> mtmPreviousFieldMap;
     private final Set<EntityInfo> previous;
     private Class<E> entityClass;
     private S service;
     private final Set<EntityInfo> next;
-    private final Map<EntityInfo, List<Field>> otoFieldMap;
-    private final Map<EntityInfo, List<Field>> otmFieldMap;
-    private final Map<EntityInfo, List<Field>> mtmFieldMap;
+    private final Map<EntityInfo, List<Field>> otoNextFieldMap;
+    private final Map<EntityInfo, List<Field>> otmNextFieldMap;
+    private final Map<EntityInfo, List<Field>> mtmNextFieldMap;
 
     public EntityInfo() {
+        this.otoPreviousFieldMap = new HashMap<>();
+        this.otmPreviousFieldMap = new HashMap<>();
+        this.mtmPreviousFieldMap = new HashMap<>();
         this.previous = new HashSet<>();
         this.entityClass = null;
         this.service = null;
         this.next = new HashSet<>();
-        this.otoFieldMap = new HashMap<>();
-        this.otmFieldMap = new HashMap<>();
-        this.mtmFieldMap = new HashMap<>();
+        this.otoNextFieldMap = new HashMap<>();
+        this.otmNextFieldMap = new HashMap<>();
+        this.mtmNextFieldMap = new HashMap<>();
     }
 
-    public void addOtOField(EntityInfo entityInfo, Field field) {
-        otoFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    public void addOtOPreviousField(EntityInfo entityInfo, Field annotation) {
+        otoPreviousFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(annotation);
     }
 
-    public void addOtMField(EntityInfo entityInfo, Field field) {
-        otmFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    public void addOtMPreviousField(EntityInfo entityInfo, Field annotation) {
+        otmPreviousFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(annotation);
     }
 
-    public void addMtMField(EntityInfo entityInfo, Field field) {
-        mtmFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    public void addMtMPreviousField(EntityInfo entityInfo, Field annotation) {
+        mtmPreviousFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(annotation);
     }
 
-    public Map<EntityInfo, List<Field>> getOtoFieldMap() {
-        return otoFieldMap;
+    public Map<EntityInfo, List<Field>> getOtoPreviousFieldMap() {
+        return otoPreviousFieldMap;
     }
 
-    public Map<EntityInfo, List<Field>> getOtmFieldMap() {
-        return otmFieldMap;
+    public Map<EntityInfo, List<Field>> getOtmPreviousFieldMap() {
+        return otmPreviousFieldMap;
     }
 
-    public Map<EntityInfo, List<Field>> getMtmFieldMap() {
-        return mtmFieldMap;
+    public Map<EntityInfo, List<Field>> getMtmPreviousFieldMap() {
+        return mtmPreviousFieldMap;
+    }
+
+    public void addOtONextField(EntityInfo entityInfo, Field field) {
+        otoNextFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    }
+
+    public void addOtMNextField(EntityInfo entityInfo, Field field) {
+        otmNextFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    }
+
+    public void addMtMNextField(EntityInfo entityInfo, Field field) {
+        mtmNextFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    }
+
+    public Map<EntityInfo, List<Field>> getOtoNextFieldMap() {
+        return otoNextFieldMap;
+    }
+
+    public Map<EntityInfo, List<Field>> getOtmNextFieldMap() {
+        return otmNextFieldMap;
+    }
+
+    public Map<EntityInfo, List<Field>> getMtmNextFieldMap() {
+        return mtmNextFieldMap;
     }
 
 

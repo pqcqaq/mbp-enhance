@@ -72,7 +72,8 @@ public class EntityRelaRegister implements DisposableBean {
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo1 = EntityRelation.entityInfoMap.get(service);
                     entityInfo1.addPrevious(entityInfo);
                     entityInfo.addNext(entityInfo1);
-                    entityInfo.addOtOField(entityInfo1, declaredField);
+                    entityInfo.addOtONextField(entityInfo1, declaredField);
+                    entityInfo1.addOtOPreviousField(entityInfo, declaredField);
                 }
 
                 if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
@@ -82,7 +83,8 @@ public class EntityRelaRegister implements DisposableBean {
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo1 = EntityRelation.entityInfoMap.get(service);
                     entityInfo1.addPrevious(entityInfo);
                     entityInfo.addNext(entityInfo1);
-                    entityInfo.addOtMField(entityInfo1, declaredField);
+                    entityInfo.addOtMNextField(entityInfo1, declaredField);
+                    entityInfo1.addOtMPreviousField(entityInfo, declaredField);
                 }
 
                 if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
@@ -97,7 +99,8 @@ public class EntityRelaRegister implements DisposableBean {
                     entityInfo.addNext(entityInfo1);
                     entityInfo2.addPrevious(entityInfo1);
                     entityInfo1.addNext(entityInfo2);
-                    entityInfo.addMtMField(entityInfo2, declaredField);
+                    entityInfo.addMtMNextField(entityInfo2, declaredField);
+                    entityInfo2.addMtMPreviousField(entityInfo1, declaredField);
                 }
             }
         });

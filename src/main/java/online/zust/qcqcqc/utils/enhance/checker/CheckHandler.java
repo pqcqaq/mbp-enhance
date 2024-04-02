@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author qcqcqc
@@ -27,46 +27,38 @@ public class CheckHandler {
     public static <T> void doCheck(T service, Serializable id) throws DependencyCheckException {
         EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(service.getClass());
         checkPrevious(id, entityInfo);
+        checkNext(id, entityInfo);
+    }
+
+    private static void checkNext(Serializable id, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
+        if (entityInfo == null) {
+            throw new DependencyCheckException("未找到对应的实体类关系信息");
+        }
+        // 只有otm和mtm是需要反查的，然后进行一次查询，如果还有子数据，就抛出异常
+        entityInfo.getOtmNextFieldMap().forEach((entityInfo1, fields) -> fields.forEach(field -> handleOtMDeepSearch(entityInfo1.getEntityClass(), field, entityInfo1.getService(), id)));
+        entityInfo.getMtmNextFieldMap().forEach((entityInfo1, fields) -> fields.forEach(field -> handleMtMDeepSearch(field, id)));
     }
 
     private static void checkPrevious(Serializable id, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
-        Set<EntityInfo> previous = entityInfo.getPrevious();
-        previous.forEach(item -> {
-            EnhanceService<? extends BaseMapper<?>, ?> service1 = item.getService();
-            Class<?> entityClass = service1.getEntityClass();
-            Field[] declaredFields = entityClass.getDeclaredFields();
-            for (Field declaredField : declaredFields) {
-                Annotation annotation = matchFieldTypeAndContainAnnotation(declaredField, entityInfo.getEntityClass());
-                if (annotation == null) {
-                    continue;
-                }
-                switch (annotation.annotationType().getSimpleName()) {
-                    case "OtODeepSearch" -> handleOtODeepSearch(entityClass, declaredField, service1, id);
-                    case "OtMDeepSearch" -> handleOtMDeepSearch(entityClass, declaredField, service1, id);
-                    case "MtMDeepSearch" -> handleMtMDeepSearch(declaredField, id);
-                }
-            }
-        });
+        if (entityInfo == null) {
+            throw new DependencyCheckException("未找到对应的实体类关系信息");
+        }
+        // 只有oto是需要反查的，其他的都是模拟一次查询，如果有数据就抛出异常
+        Map<EntityInfo, List<Field>> otoPreviousFieldMap = entityInfo.getOtoPreviousFieldMap();
+        otoPreviousFieldMap.forEach((entityInfo1, fields) -> fields.forEach(field -> {
+            handleOtODeepSearch(entityInfo1.getEntityClass(), field, entityInfo1.getService(), id);
+        }));
     }
 
     private static void handleMtMDeepSearch(Field declaredField, Serializable id) {
-        // TODO: 这里有问题，因为无法获取到关联表的信息，关联表里面是没有注解的
-//        MtMDeepSearch annotation = declaredField.getAnnotation(MtMDeepSearch.class);
-//        String s = annotation.targetId();
-//        if (s.trim().isEmpty()) {
-//            s = FieldNameConvertUtils.camelToUnderline(s);
-//        }
-//        Class<? extends EnhanceService> aClass = annotation.relaService();
-//        EnhanceService bean = ProxyUtil.getBean(aClass);
-//        List<Object> list = bean.list(new QueryWrapper<>().eq(s, id));
-//        if (!list.isEmpty()) {
-//            MsgOnInversePointer annotation1 = declaredField.getAnnotation(MsgOnInversePointer.class);
-//            String msg = annotation1 == null ? "待删除的对象在关系类" + bean.getEntityClass().getSimpleName() + "中存在依赖关系，无法删除" : annotation1.value();
-//            throw new DependencyCheckException(msg);
-//        }
+        // MtM就是进行一次查询，如果还有子数据，就抛出异常
+        MtMDeepSearch annotation = declaredField.getAnnotation(MtMDeepSearch.class);
+
     }
 
     private static void handleOtMDeepSearch(Class<?> entityClass, Field declaredField, EnhanceService<? extends BaseMapper<?>, ?> service1, Serializable id) {
+        OtMDeepSearch annotation = declaredField.getAnnotation(OtMDeepSearch.class);
+
     }
 
     private static void handleOtODeepSearch(Class<?> entityClass, Field declaredField, EnhanceService<? extends BaseMapper<?>, ?> service1, Serializable id) {
