@@ -9,6 +9,9 @@ import online.zust.qcqcqc.utils.enhance.EntityInfo;
 import online.zust.qcqcqc.utils.enhance.EntityRelation;
 import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import online.zust.qcqcqc.utils.utils.FieldNameConvertUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -20,11 +23,37 @@ import java.util.Map;
  * Date: 2024/3/30
  * Time: 23:20
  */
+@Component
 public class CheckHandler {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(CheckHandler.class);
+    private static CheckerConfig checkerConfig;
+
+    @Autowired(required = false)
+    public CheckHandler(CheckerConfig checkerConfig) {
+        if (checkerConfig == null) {
+            logger.warn("未找到CheckerConfig的实现类，无法进行依赖检查");
+        }
+        CheckHandler.checkerConfig = checkerConfig;
+    }
+
     public static void doCheck(EnhanceService service, Serializable id) throws DependencyCheckException {
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(service.getClass());
-        checkPrevious(id, entityInfo);
-        checkNext(id, entityInfo);
+        if (checkerConfig == null) {
+            logger.warn("未找到CheckerConfig的实现类，无法进行依赖检查");
+            return;
+        }
+        Class<? extends EnhanceService> aClass = service.getClass();
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(aClass);
+        if (entityInfo == null) {
+            throw new DependencyCheckException("未找到对应的实体类关系信息");
+        }
+        List<Class<?>> invClass = checkerConfig.needInversePointCheck();
+        if (invClass != null && invClass.contains(entityInfo.getEntityClass())) {
+            checkPrevious(id, entityInfo);
+        }
+        List<Class<?>> forClass = checkerConfig.needForwardPointerCheck();
+        if (forClass != null && forClass.contains(entityInfo.getEntityClass())) {
+            checkNext(id, entityInfo);
+        }
     }
 
     private static void checkNext(Serializable id, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
@@ -39,8 +68,9 @@ public class CheckHandler {
     }
 
     private static void checkPrevious(Serializable id, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
-        if (entityInfo == null) {
-            throw new DependencyCheckException("未找到对应的实体类关系信息");
+        Object byId = entityInfo.getService().getById(id, 0);
+        if (byId == null) {
+            throw new DependencyCheckException("待删除的对象不存在");
         }
         // 只有oto是需要反查的，其他的都是模拟一次查询，如果有数据就抛出异常
         Map<EntityInfo, List<Field>> otoPreviousFieldMap = entityInfo.getOtoPreviousFieldMap();
@@ -90,7 +120,7 @@ public class CheckHandler {
         field = FieldNameConvertUtils.camelToUnderline(field);
         QueryWrapper objectQueryWrapper = new QueryWrapper();
         objectQueryWrapper.eq(field, id);
-        List<Object> list = service1.list(objectQueryWrapper);
+        List<Object> list = service1.list(objectQueryWrapper, 0);
         if (!list.isEmpty()) {
             MsgOnInversePointer annotation1 = declaredField.getAnnotation(MsgOnInversePointer.class);
             String msg = annotation1 == null ? "待删除的对象在类" + entityClass.getSimpleName() + "(list: " + list + ")" + "中存在依赖关系，无法删除" : annotation1.value();

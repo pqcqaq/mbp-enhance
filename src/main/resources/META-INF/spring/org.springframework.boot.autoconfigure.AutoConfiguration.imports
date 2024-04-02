@@ -5,3 +5,4 @@ online.zust.qcqcqc.utils.config.defaults.converter.FastJson2Converter
 online.zust.qcqcqc.utils.config.defaults.converter.JacksonConverter
 online.zust.qcqcqc.utils.utils.ProxyUtil
 online.zust.qcqcqc.utils.enhance.EntityRelaRegister
+online.zust.qcqcqc.utils.enhance.checker.CheckHandler
