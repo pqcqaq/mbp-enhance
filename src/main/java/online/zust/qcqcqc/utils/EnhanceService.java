@@ -14,6 +14,8 @@ import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
+import online.zust.qcqcqc.utils.enhance.EntityInfo;
+import online.zust.qcqcqc.utils.enhance.EntityRelation;
 import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
 import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
@@ -232,18 +234,34 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             return null;
         }
         Class<?> aClass = entity.getClass();
-        Field[] declaredFields = aClass.getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            if (declaredField.isAnnotationPresent(OtODeepSearch.class)) {
-                handleOtOAnnotation(entity, declaredField, aClass, deep);
-            }
-            if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
-                handleMtMAnnotation(entity, declaredField, aClass, deep);
-            }
-            if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
-                handleOtMAnnotation(entity, declaredField, aClass, deep);
-            }
-        }
+//        Field[] declaredFields = aClass.getDeclaredFields();
+//        for (Field declaredField : declaredFields) {
+//            if (declaredField.isAnnotationPresent(OtODeepSearch.class)) {
+//                handleOtOAnnotation(entity, declaredField, aClass, deep);
+//            }
+//            if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
+//                handleMtMAnnotation(entity, declaredField, aClass, deep);
+//            }
+//            if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
+//                handleOtMAnnotation(entity, declaredField, aClass, deep);
+//            }
+//        }
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(getClass());
+        entityInfo.getOtoFieldMap().forEach((entityInfo1, fields) -> {
+            fields.forEach(field -> {
+                handleOtOAnnotation(entity, field, aClass, deep);
+            });
+        });
+        entityInfo.getOtmFieldMap().forEach((entityInfo1, fields) -> {
+            fields.forEach(field -> {
+                handleOtMAnnotation(entity, field, aClass, deep);
+            });
+        });
+        entityInfo.getMtmFieldMap().forEach((entityInfo1, fields) -> {
+            fields.forEach(field -> {
+                handleMtMAnnotation(entity, field, aClass, deep);
+            });
+        });
         return entity;
     }
 
@@ -267,6 +285,8 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
                         throw new DependencyCheckException(e.getMessage());
                     }
                     break;
+                } else {
+                    throw new DependencyCheckException("没有找到id字段");
                 }
             }
         }

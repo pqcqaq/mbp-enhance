@@ -27,10 +27,10 @@ public class EntityRelation {
         visited.add(entityInfo);
 
         // 获取下一个节点列表
-        Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> nextNodes = entityInfo.getNext();
+        Set<EntityInfo> nextNodes = entityInfo.getNext();
 
         // 递归打印下一个节点
-        for (EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> nextNode : nextNodes) {
+        for (EntityInfo nextNode : nextNodes) {
             if (!visited.contains(nextNode)) { // 如果下一个节点未被访问过
                 printEntityTree(nextNode, depth + 1, new HashSet<>(visited));
             } else {

@@ -30,7 +30,7 @@ public class CheckHandler {
     }
 
     private static void checkPrevious(Serializable id, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
-        Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous = entityInfo.getPrevious();
+        Set<EntityInfo> previous = entityInfo.getPrevious();
         previous.forEach(item -> {
             EnhanceService<? extends BaseMapper<?>, ?> service1 = item.getService();
             Class<?> entityClass = service1.getEntityClass();
