@@ -232,7 +232,7 @@ public class BeanConvertUtils {
         RequireDefault annotation = declaredField.getAnnotation(RequireDefault.class);
         declaredField.setAccessible(true);
         try {
-            declaredField.set(after, jsonConverter.convertValue(annotation.value(), declaredField.getType()));
+            declaredField.set(after, jsonConverter.fromString(annotation.value(), declaredField.getType()));
         } catch (Exception e) {
             log.error("设置默认值失败", e);
             throw new BeanConventException(e);
