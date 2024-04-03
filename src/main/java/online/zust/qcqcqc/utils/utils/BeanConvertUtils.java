@@ -109,7 +109,8 @@ public class BeanConvertUtils {
             if (declaredField.getName().equals("serialVersionUID")) {
                 continue;
             }
-            if (declaredField.getAnnotation(RequireDefault.class) != null) {
+            RequireDefault defaultAnnotation = declaredField.getAnnotation(RequireDefault.class);
+            if (defaultAnnotation != null && !defaultAnnotation.onNull()) {
                 setDefaultValue(after, declaredField);
                 continue;
             }
@@ -208,10 +209,14 @@ public class BeanConvertUtils {
                         declaredField.set(after, list1);
                     }
                 }
+                if (defaultAnnotation != null && declaredField.get(after) == null) {
+                    setDefaultValue(after, declaredField);
+                }
             } catch (Exception e) {
                 log.error("字段转换失败", e);
                 throw new BeanConventException(e);
             }
+
         }
         return after;
     }
@@ -229,15 +234,8 @@ public class BeanConvertUtils {
         try {
             declaredField.set(after, jsonConverter.convertValue(annotation.value(), declaredField.getType()));
         } catch (Exception e) {
-            if (!annotation.nullable()) {
-                throw new BeanConventException(e);
-            }
-            try {
-                declaredField.set(after, null);
-            } catch (IllegalAccessException ex) {
-                throw new BeanConventException(ex);
-            }
-            log.error("字段转换失败", e);
+            log.error("设置默认值失败", e);
+            throw new BeanConventException(e);
         }
     }
 
@@ -425,6 +423,9 @@ public class BeanConvertUtils {
      * @return 目标类型对象
      */
     public static <T> T copyProperties(Class<T> target, Object... source) {
+        if (source == null || source.length == 0) {
+            return null;
+        }
         T t = objectConvent(source[0], target);
         for (int i = 1; i < source.length; i++) {
             fieldConvent(source[i], t, true);

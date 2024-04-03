@@ -18,8 +18,8 @@ public @interface RequireDefault {
     String value();
 
     /**
-     * 是否允许为空
-     * @return 是否允许为空
+     * 是否在为空时使用默认值
+     * @return 是否在为空时使用默认值
      */
-    boolean nullable() default true;
+    boolean onNull() default false;
 }
