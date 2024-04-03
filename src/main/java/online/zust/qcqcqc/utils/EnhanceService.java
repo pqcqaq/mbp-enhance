@@ -235,34 +235,34 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             return null;
         }
         Class<?> aClass = entity.getClass();
-//        Field[] declaredFields = aClass.getDeclaredFields();
-//        for (Field declaredField : declaredFields) {
-//            if (declaredField.isAnnotationPresent(OtODeepSearch.class)) {
-//                handleOtOAnnotation(entity, declaredField, aClass, deep);
-//            }
-//            if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
-//                handleMtMAnnotation(entity, declaredField, aClass, deep);
-//            }
-//            if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
-//                handleOtMAnnotation(entity, declaredField, aClass, deep);
-//            }
-//        }
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(getClass());
-        entityInfo.getOtoNextFieldMap().forEach((entityInfo1, fields) -> {
-            fields.forEach(field -> {
-                handleOtOAnnotation(entity, field, aClass, deep);
-            });
-        });
-        entityInfo.getOtmNextFieldMap().forEach((entityInfo1, fields) -> {
-            fields.forEach(field -> {
-                handleOtMAnnotation(entity, field, aClass, deep);
-            });
-        });
-        entityInfo.getMtmNextFieldMap().forEach((entityInfo1, fields) -> {
-            fields.forEach(field -> {
-                handleMtMAnnotation(entity, field, aClass, deep);
-            });
-        });
+        Field[] declaredFields = aClass.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (declaredField.isAnnotationPresent(OtODeepSearch.class)) {
+                handleOtOAnnotation(entity, declaredField, aClass, deep);
+            }
+            if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
+                handleMtMAnnotation(entity, declaredField, aClass, deep);
+            }
+            if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
+                handleOtMAnnotation(entity, declaredField, aClass, deep);
+            }
+        }
+//        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(getClass());
+//        entityInfo.getOtoNextFieldMap().forEach((entityInfo1, fields) -> {
+//            fields.forEach(field -> {
+//                handleOtOAnnotation(entity, field, aClass, deep);
+//            });
+//        });
+//        entityInfo.getOtmNextFieldMap().forEach((entityInfo1, fields) -> {
+//            fields.forEach(field -> {
+//                handleOtMAnnotation(entity, field, aClass, deep);
+//            });
+//        });
+//        entityInfo.getMtmNextFieldMap().forEach((entityInfo1, fields) -> {
+//            fields.forEach(field -> {
+//                handleMtMAnnotation(entity, field, aClass, deep);
+//            });
+//        });
         return entity;
     }
 
