@@ -1,14 +1,19 @@
 package online.zust.qcqcqc.utils.enhance;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
+import online.zust.qcqcqc.utils.exception.MbpEnhanceBeanRegisterError;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +52,7 @@ public class EntityRelaRegister implements DisposableBean {
     private static void addRelaToTree() {
         // find no previous entity and add it to the root
         EntityRelation.entityInfoMap.forEach((entityClass, entityInfo) -> {
-            Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous = entityInfo.getPrevious();
+            Set<EntityInfo> previous = entityInfo.getPrevious();
             if (previous.isEmpty()) {
                 EntityRelation.BaseEntity.getNext().add(entityInfo);
                 entityInfo.getPrevious().add(EntityRelation.BaseEntity);
@@ -67,6 +72,8 @@ public class EntityRelaRegister implements DisposableBean {
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo1 = EntityRelation.entityInfoMap.get(service);
                     entityInfo1.addPrevious(entityInfo);
                     entityInfo.addNext(entityInfo1);
+                    entityInfo.addOtONextField(entityInfo1, declaredField);
+                    entityInfo1.addOtOPreviousField(entityInfo, declaredField);
                 }
 
                 if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
@@ -76,6 +83,8 @@ public class EntityRelaRegister implements DisposableBean {
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo1 = EntityRelation.entityInfoMap.get(service);
                     entityInfo1.addPrevious(entityInfo);
                     entityInfo.addNext(entityInfo1);
+                    entityInfo.addOtMNextField(entityInfo1, declaredField);
+                    entityInfo1.addOtMPreviousField(entityInfo, declaredField);
                 }
 
                 if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
@@ -90,16 +99,46 @@ public class EntityRelaRegister implements DisposableBean {
                     entityInfo.addNext(entityInfo1);
                     entityInfo2.addPrevious(entityInfo1);
                     entityInfo1.addNext(entityInfo2);
+                    entityInfo.addMtMNextField(entityInfo2, declaredField);
+                    entityInfo2.addMtMPreviousField(entityInfo1, declaredField);
                 }
             }
         });
     }
 
     private void registerBean(Class entityClass, EnhanceService enhanceService) {
+        doCheckBean(entityClass);
         EntityInfo objectEnhanceServiceBaseMapperEntityInfo = new EntityInfo();
         objectEnhanceServiceBaseMapperEntityInfo.setEntityClass(entityClass);
         objectEnhanceServiceBaseMapperEntityInfo.setService(enhanceService);
         EntityRelation.entityInfoMap.put(enhanceService.getSelfClass(), objectEnhanceServiceBaseMapperEntityInfo);
+    }
+
+    private void doCheckBean(Class entityClass) {
+        Field[] declaredFields = entityClass.getDeclaredFields();
+        Annotation annotation = entityClass.getAnnotation(TableName.class);
+        boolean hasTableId = false;
+        if (annotation == null) {
+            throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表名");
+        }
+        for (Field declaredField : declaredFields) {
+            if (declaredField.isAnnotationPresent(OtODeepSearch.class) || declaredField.isAnnotationPresent(OtMDeepSearch.class) || declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
+                if (declaredField.isAnnotationPresent(TableField.class)) {
+                    TableField tableField = declaredField.getAnnotation(TableField.class);
+                    if (tableField.exist()) {
+                        throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "的字段" + declaredField.getName() + "未在数据库中存在, 请设置TableField注解中的(exist = false)");
+                    }
+                } else {
+                    throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "的字段" + declaredField.getName() + "未在数据库中存在, 请添加@TableField(exist = false)注解");
+                }
+            }
+            if (declaredField.isAnnotationPresent(TableId.class)) {
+                hasTableId = true;
+            }
+        }
+        if (!hasTableId) {
+            throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
+        }
     }
 
     @Override

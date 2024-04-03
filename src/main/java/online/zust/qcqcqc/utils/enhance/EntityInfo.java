@@ -3,50 +3,97 @@ package online.zust.qcqcqc.utils.enhance;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
 public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<E>> {
 
+    private final Map<EntityInfo, List<Field>> otoPreviousFieldMap;
+    private final Map<EntityInfo, List<Field>> otmPreviousFieldMap;
+    private final Map<EntityInfo, List<Field>> mtmPreviousFieldMap;
+    private final Set<EntityInfo> previous;
+    private Class<E> entityClass;
+    private S service;
+    private final Set<EntityInfo> next;
+    private final Map<EntityInfo, List<Field>> otoNextFieldMap;
+    private final Map<EntityInfo, List<Field>> otmNextFieldMap;
+    private final Map<EntityInfo, List<Field>> mtmNextFieldMap;
+
     public EntityInfo() {
+        this.otoPreviousFieldMap = new HashMap<>();
+        this.otmPreviousFieldMap = new HashMap<>();
+        this.mtmPreviousFieldMap = new HashMap<>();
         this.previous = new HashSet<>();
         this.entityClass = null;
         this.service = null;
         this.next = new HashSet<>();
+        this.otoNextFieldMap = new HashMap<>();
+        this.otmNextFieldMap = new HashMap<>();
+        this.mtmNextFieldMap = new HashMap<>();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        EntityInfo<?, ?, ?> that = (EntityInfo<?, ?, ?>) o;
-        return Objects.equals(entityClass, that.entityClass) && Objects.equals(service, that.service);
+    public void addOtOPreviousField(EntityInfo entityInfo, Field annotation) {
+        otoPreviousFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(annotation);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(entityClass, service);
+    public void addOtMPreviousField(EntityInfo entityInfo, Field annotation) {
+        otmPreviousFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(annotation);
     }
 
-    private final Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous;
-    private Class<E> entityClass;
-    private S service;
-    private final Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> next;
+    public void addMtMPreviousField(EntityInfo entityInfo, Field annotation) {
+        mtmPreviousFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(annotation);
+    }
 
-    public void addPrevious(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
+    public Map<EntityInfo, List<Field>> getOtoPreviousFieldMap() {
+        return otoPreviousFieldMap;
+    }
+
+    public Map<EntityInfo, List<Field>> getOtmPreviousFieldMap() {
+        return otmPreviousFieldMap;
+    }
+
+    public Map<EntityInfo, List<Field>> getMtmPreviousFieldMap() {
+        return mtmPreviousFieldMap;
+    }
+
+    public void addOtONextField(EntityInfo entityInfo, Field field) {
+        otoNextFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    }
+
+    public void addOtMNextField(EntityInfo entityInfo, Field field) {
+        otmNextFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    }
+
+    public void addMtMNextField(EntityInfo entityInfo, Field field) {
+        mtmNextFieldMap.computeIfAbsent(entityInfo, k -> new ArrayList<>()).add(field);
+    }
+
+    public Map<EntityInfo, List<Field>> getOtoNextFieldMap() {
+        return otoNextFieldMap;
+    }
+
+    public Map<EntityInfo, List<Field>> getOtmNextFieldMap() {
+        return otmNextFieldMap;
+    }
+
+    public Map<EntityInfo, List<Field>> getMtmNextFieldMap() {
+        return mtmNextFieldMap;
+    }
+
+
+    public void addPrevious(EntityInfo entityInfo) {
         previous.add(entityInfo);
     }
 
-    public void addNext(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo) {
+    public void addNext(EntityInfo entityInfo) {
         next.add(entityInfo);
     }
 
-    public Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getPrevious() {
+    public Set<EntityInfo> getPrevious() {
         return previous;
     }
 
-    public Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getNext() {
+    public Set<EntityInfo> getNext() {
         return next;
     }
 
@@ -71,5 +118,18 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
         objectEnhanceServiceBaseMapperEntityInfo.setEntityClass(Object.class);
         objectEnhanceServiceBaseMapperEntityInfo.setService(null);
         return objectEnhanceServiceBaseMapperEntityInfo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EntityInfo<?, ?, ?> that = (EntityInfo<?, ?, ?>) o;
+        return Objects.equals(entityClass, that.entityClass) && Objects.equals(service, that.service);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityClass, service);
     }
 }
