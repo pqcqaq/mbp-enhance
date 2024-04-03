@@ -33,6 +33,10 @@ public class CheckHandler {
         Set<EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> previous = entityInfo.getPrevious();
         previous.forEach(item -> {
             EnhanceService<? extends BaseMapper<?>, ?> service1 = item.getService();
+            if (service1 == null) {
+                // 如果为null，则表示顶层对象为Object，不需要检查
+                return;
+            }
             Class<?> entityClass = service1.getEntityClass();
             Field[] declaredFields = entityClass.getDeclaredFields();
             for (Field declaredField : declaredFields) {
