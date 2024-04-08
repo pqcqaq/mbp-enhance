@@ -7,6 +7,7 @@ import online.zust.qcqcqc.utils.config.defaults.converter.FastJsonConverter;
 import online.zust.qcqcqc.utils.config.defaults.converter.JacksonConverter;
 import online.zust.qcqcqc.utils.enhance.EntityRelaRegister;
 import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
+import online.zust.qcqcqc.utils.enhance.checker.DefaultCheckerConfig;
 import online.zust.qcqcqc.utils.utils.BeanConvertUtils;
 import online.zust.qcqcqc.utils.utils.ProxyUtil;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,8 @@ import org.springframework.context.annotation.Import;
         FastJson2Converter.class,
         JacksonConverter.class,
         EntityRelaRegister.class,
-        CheckHandler.class
+        CheckHandler.class,
+        DefaultCheckerConfig.class
 })
 public class MbpEnhanceAutoInject {
     @Bean
