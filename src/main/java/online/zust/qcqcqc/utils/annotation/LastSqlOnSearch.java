@@ -1,5 +1,7 @@
 package online.zust.qcqcqc.utils.annotation;
 
+import org.intellij.lang.annotations.Language;
+
 import java.lang.annotation.*;
 
 /**
@@ -11,5 +13,11 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface LastSqlOnSearch {
+    /**
+     * 需要在搜索时进行的sql
+     *
+     * @return 需要在搜索时进行的sql
+     */
+    @Language("SQL")
     String value() default "";
 }
