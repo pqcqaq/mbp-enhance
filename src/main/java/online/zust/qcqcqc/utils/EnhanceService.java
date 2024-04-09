@@ -11,11 +11,10 @@ import com.baomidou.mybatisplus.core.override.MybatisMapperProxy;
 import com.baomidou.mybatisplus.core.toolkit.*;
 import com.baomidou.mybatisplus.core.toolkit.reflect.GenericTypeUtils;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+import online.zust.qcqcqc.utils.annotation.LastSqlOnSearch;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
-import online.zust.qcqcqc.utils.enhance.EntityInfo;
-import online.zust.qcqcqc.utils.enhance.EntityRelation;
 import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
 import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
@@ -47,7 +46,7 @@ import java.util.function.Function;
 @SuppressWarnings("all")
 public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhance<T>, InitializingBean {
 
-    private final int DEEP = 9;
+    private static final int DEEP = 9;
 
     protected final Log log = LogFactory.getLog(getClass());
 
@@ -67,11 +66,6 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
     public Class<? extends EnhanceService> getSelfClass() {
         return getClass();
     }
-
-    public EnhanceService<?, ?> getBean() {
-        return ProxyUtil.getBean(getClass());
-    }
-
 
     private volatile SqlSessionFactory sqlSessionFactory;
 
@@ -185,6 +179,16 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         }
         byId = getDeepSearch(byId, deep);
         return byId;
+    }
+
+    @Override
+    public T getOne(Wrapper<T> queryWrapper, int deep) {
+        T t = baseMapper.selectOne(queryWrapper);
+        if (deep <= 0) {
+            return t;
+        }
+        t = getDeepSearch(t, deep);
+        return t;
     }
 
     @Override
@@ -320,7 +324,21 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         declaredField1.setAccessible(true);
         Object value = declaredField1.get(entity);
         if (value instanceof Long l) {
-            List<?> list = bean.list(new QueryWrapper<>().eq(baseId, l), deep - 1);
+            LastSqlOnSearch annotation = declaredField.getAnnotation(LastSqlOnSearch.class);
+            List<?> list;
+            if (annotation == null || annotation.value().trim().isEmpty()) {
+                // 获取service的list方法
+                list = bean.list(new QueryWrapper<>().eq(baseId, l), deep - 1);
+                declaredField.set(entity, list);
+            } else {
+                // 获取service的list方法
+                String sql = annotation.value();
+                QueryWrapper queryWrapper = new QueryWrapper();
+                queryWrapper.eq(baseId, l);
+                queryWrapper.last(sql);
+                list = bean.list(queryWrapper, deep - 1);
+                declaredField.set(entity, list);
+            }
             declaredField.set(entity, list);
         } else {
             if (value != null) {
@@ -411,7 +429,28 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             return;
         }
         EnhanceService targetServiceImpl = ProxyUtil.getBean(targetService);
-        List<?> list = targetServiceImpl.listByIds(targetIds, deep - 1);
+        LastSqlOnSearch annotation = deepSearchField.getAnnotation(LastSqlOnSearch.class);
+        List<?> list;
+        if (annotation == null || annotation.value().trim().isEmpty()) {
+            list = targetServiceImpl.listByIds(targetIds, deep - 1);
+        } else {
+            String idFieldName = null;
+            Class entityClass1 = targetServiceImpl.getEntityClass();
+            Field[] declaredFields = entityClass1.getDeclaredFields();
+            for (Field declaredField1 : declaredFields) {
+                if (declaredField1.isAnnotationPresent(TableId.class)) {
+                    idFieldName = declaredField1.getName();
+                    break;
+                }
+            }
+            if (idFieldName == null) {
+                throw new ErrorDeepSearchException("没有在类型 " + entityClass1.getSimpleName() + " 中找到id字段");
+            }
+            QueryWrapper queryWrapper = new QueryWrapper();
+            queryWrapper.in(FieldNameConvertUtils.camelToUnderline(idFieldName), targetIds);
+            queryWrapper.last(annotation.value());
+            list = targetServiceImpl.list(queryWrapper, deep - 1);
+        }
 
         if (targetIds.size() != list.size()) {
             log.warn("关系表中的id和目标表中的id数量不一致，可能存在数据库异常");
@@ -436,8 +475,30 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         declaredField.setAccessible(true);
         Object value = declaredField.get(entity);
         if (value instanceof Long l) {
-            // 获取service的getById方法
-            Object byId1 = bean.getById(l, deep - 1);
+            LastSqlOnSearch lastSql = deepSearchField.getAnnotation(LastSqlOnSearch.class);
+            Object byId1;
+            if (lastSql == null || lastSql.value().trim().isEmpty()) {
+                // 获取service的getById方法
+                byId1 = bean.getById(l, deep - 1);
+            } else {
+                // 获取service的getOne方法
+                Class entityClass1 = bean.getEntityClass();
+                Field[] declaredFields = entityClass1.getDeclaredFields();
+                String idField = null;
+                for (Field declaredField1 : declaredFields) {
+                    if (declaredField1.isAnnotationPresent(TableId.class)) {
+                        idField = declaredField1.getName();
+                        break;
+                    }
+                }
+                if (idField == null) {
+                    throw new ErrorDeepSearchException("没有在类型 " + entityClass1.getSimpleName() + " 中找到id字段");
+                }
+                QueryWrapper queryWrapper = new QueryWrapper();
+                queryWrapper.eq(FieldNameConvertUtils.camelToUnderline(idField), l);
+                queryWrapper.last(lastSql.value());
+                byId1 = bean.getOne(queryWrapper, deep - 1);
+            }
             deepSearchField.set(entity, byId1);
         } else {
             if (value != null) {

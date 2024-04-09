@@ -41,9 +41,12 @@ public class EntityRelation {
 
     public static void printInversePointer() {
         entityInfoMap.forEach((serviceClass, entityInfo) -> {
-            System.out.print(entityInfo.getEntityClass().getSimpleName());
-            System.out.print("->");
-            List<String> list = entityInfo.getPrevious().stream().map(EntityInfo::getEntityClass).map(Class::getSimpleName).toList();
+            System.out.print("entity: " + entityInfo.getEntityClass().getSimpleName());
+            System.out.print("---->");
+            List<String> list1 = entityInfo.getOtoPreviousFieldMap().keySet().stream().map(EntityInfo::getEntityClass).map(item -> item.getSimpleName() + "(OtO)").toList();
+            List<String> list = new ArrayList<>(list1);
+            list.addAll(entityInfo.getOtmPreviousFieldMap().keySet().stream().map(EntityInfo::getEntityClass).map(item -> item.getSimpleName() + "(OtM)").toList());
+            list.addAll(entityInfo.getMtmPreviousFieldMap().keySet().stream().map(EntityInfo::getEntityClass).map(item -> item.getSimpleName() + "(MtM)").toList());
             System.out.println(list);
         });
     }

@@ -8,7 +8,6 @@ import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author qcqcqc
@@ -31,6 +30,15 @@ public interface IServiceEnhance<T> extends IService<T> {
      * @return 实体
      */
     T getById(Serializable id, int deep);
+
+    /**
+     * 根据lambda表达式获取
+     *
+     * @param queryWrapper 查询条件
+     * @param deep         深度
+     * @return 实体
+     */
+    T getOne(Wrapper<T> queryWrapper, int deep);
 
     /**
      * 深度搜索
@@ -86,12 +94,14 @@ public interface IServiceEnhance<T> extends IService<T> {
 
     /**
      * 进行依赖检查
+     *
      * @param id 主键ID
      */
     void doCheckDependency(Serializable id) throws DependencyCheckException;
 
     /**
      * 进行依赖检查
+     *
      * @param entity 实体
      */
     void doCheckDependency(T entity) throws DependencyCheckException;

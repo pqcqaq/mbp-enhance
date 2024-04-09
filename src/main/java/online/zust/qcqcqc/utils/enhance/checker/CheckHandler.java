@@ -74,9 +74,7 @@ public class CheckHandler {
         }
         // 只有oto是需要反查的，其他的都是模拟一次查询，如果有数据就抛出异常
         Map<EntityInfo, List<Field>> otoPreviousFieldMap = entityInfo.getOtoPreviousFieldMap();
-        otoPreviousFieldMap.forEach((entityInfo1, fields) -> fields.forEach(field -> {
-            handleOtODeepSearch(entityInfo1.getEntityClass(), field, entityInfo1.getService(), id);
-        }));
+        otoPreviousFieldMap.forEach((entityInfo1, fields) -> fields.forEach(field -> handleOtODeepSearch(entityInfo1.getEntityClass(), field, entityInfo1.getService(), id)));
     }
 
     private static void handleMtMDeepSearch(Object entity, Field declaredField) {
