@@ -5,7 +5,6 @@ import online.zust.qcqcqc.utils.EnhanceService;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 /**
  * @author qcqcqc
@@ -15,7 +14,7 @@ import java.util.stream.Stream;
  */
 public class EntityRelation {
     private static final Logger logger = Logger.getLogger(EntityRelation.class.getName());
-    public static Map<Class<? extends EnhanceService<?,?>>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> entityInfoMap = new HashMap<>();
+    public static Map<Class<? extends EnhanceService<?, ?>>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> entityInfoMap = new HashMap<>();
     public static EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> BaseEntity = EntityInfo.initEmptyEntityInfo();
 
     public static <E, S extends EnhanceService<M, E>, M extends BaseMapper<E>> void printEntityTree(EntityInfo<E, S, M> entityInfo, int depth, Set<EntityInfo<?, ?, ?>> visited) {
@@ -47,5 +46,10 @@ public class EntityRelation {
             List<String> list = entityInfo.getPrevious().stream().map(EntityInfo::getEntityClass).map(Class::getSimpleName).toList();
             System.out.println(list);
         });
+    }
+
+    public static <T> EntityInfo<?, ? extends EnhanceService<?, ?>,
+            ? extends BaseMapper<?>> getEntityInfoByClass(Class<T> clazz) {
+        return entityInfoMap.values().stream().filter(entityInfo -> entityInfo.getEntityClass().equals(clazz)).findFirst().orElse(null);
     }
 }

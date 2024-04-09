@@ -8,6 +8,7 @@ import online.zust.qcqcqc.utils.config.defaults.converter.JacksonConverter;
 import online.zust.qcqcqc.utils.enhance.EntityRelaRegister;
 import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
 import online.zust.qcqcqc.utils.enhance.checker.DefaultCheckerConfig;
+import online.zust.qcqcqc.utils.enhance.searcher.GeneralEntitySearcher;
 import online.zust.qcqcqc.utils.utils.BeanConvertUtils;
 import online.zust.qcqcqc.utils.utils.ProxyUtil;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,8 @@ import org.springframework.context.annotation.Import;
         JacksonConverter.class,
         EntityRelaRegister.class,
         CheckHandler.class,
-        DefaultCheckerConfig.class
+        DefaultCheckerConfig.class,
+        GeneralEntitySearcher.class
 })
 public class MbpEnhanceAutoInject {
     @Bean

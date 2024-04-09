@@ -122,8 +122,12 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         EntityInfo<?, ?, ?> that = (EntityInfo<?, ?, ?>) o;
         return Objects.equals(entityClass, that.entityClass) && Objects.equals(service, that.service);
     }
