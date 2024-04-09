@@ -18,6 +18,6 @@ public @interface LastSqlOnSearch {
      *
      * @return 需要在搜索时进行的sql
      */
-    @Language("SQL")
+//    @Language("SQL")
     String value() default "";
 }

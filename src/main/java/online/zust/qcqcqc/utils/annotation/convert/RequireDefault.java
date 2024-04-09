@@ -1,5 +1,7 @@
 package online.zust.qcqcqc.utils.annotation.convert;
 
+import org.intellij.lang.annotations.Language;
+
 import java.lang.annotation.*;
 
 /**
@@ -15,6 +17,7 @@ public @interface RequireDefault {
      * 默认值（json）
      * @return 默认值
      */
+    @Language("JSON")
     String value();
 
     /**
