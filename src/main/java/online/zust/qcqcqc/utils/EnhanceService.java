@@ -2,6 +2,7 @@ package online.zust.qcqcqc.utils;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -299,7 +300,34 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
     }
 
     @Override
-    public Page<T> pageByLambda(Long page, Long size, QueryWrapper<T> queryWrapper, int deep) {
+    public Page<T> pageByLambda(Long page, Long size, LambdaQueryWrapper<T> queryWrapper) {
+        Page<T> tPage = new Page<>(page, size);
+        Page<T> page1 = baseMapper.selectPage(tPage, queryWrapper);
+        List<T> records = page1.getRecords();
+        records.forEach(this::getDeepSearch);
+        return page1;
+    }
+
+    @Override
+    public Page<T> pageByLambda(Long page, Long size, LambdaQueryWrapper<T> queryWrapper, int deep) {
+        Page<T> tPage = new Page<>(page, size);
+        Page<T> page1 = baseMapper.selectPage(tPage, queryWrapper);
+        List<T> records = page1.getRecords();
+        records.forEach(e -> e = getDeepSearch(e, deep));
+        return page1;
+    }
+
+    @Override
+    public Page<T> pageByLambda(Integer page, Integer size, LambdaQueryWrapper<T> queryWrapper) {
+        Page<T> tPage = new Page<>(page, size);
+        Page<T> page1 = baseMapper.selectPage(tPage, queryWrapper);
+        List<T> records = page1.getRecords();
+        records.forEach(this::getDeepSearch);
+        return page1;
+    }
+
+    @Override
+    public Page<T> pageByLambda(Integer page, Integer size, LambdaQueryWrapper<T> queryWrapper, int deep) {
         Page<T> tPage = new Page<>(page, size);
         Page<T> page1 = baseMapper.selectPage(tPage, queryWrapper);
         List<T> records = page1.getRecords();

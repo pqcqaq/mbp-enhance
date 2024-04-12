@@ -8,6 +8,7 @@ import java.util.List;
  * Time: 23:51
  */
 public interface CheckerConfig {
+
     /**
      * 需要进行反向指针检查的服务
      * @return 需要进行反向指针检查的服务
