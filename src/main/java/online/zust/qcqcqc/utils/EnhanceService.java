@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.override.MybatisMapperProxy;
 import com.baomidou.mybatisplus.core.toolkit.*;
 import com.baomidou.mybatisplus.core.toolkit.reflect.GenericTypeUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import online.zust.qcqcqc.utils.annotation.LastSqlOnSearch;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
@@ -295,6 +296,15 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
                 }
             }
         }
+    }
+
+    @Override
+    public Page<T> pageByLambda(Long page, Long size, QueryWrapper<T> queryWrapper, int deep) {
+        Page<T> tPage = new Page<>(page, size);
+        Page<T> page1 = baseMapper.selectPage(tPage, queryWrapper);
+        List<T> records = page1.getRecords();
+        records.forEach(e -> e = getDeepSearch(e, deep));
+        return page1;
     }
 
     private void handleOtMAnnotation(T entity, Field declaredField, Class<?> aClass, int deep) {

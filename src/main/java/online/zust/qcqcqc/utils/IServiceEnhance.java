@@ -2,6 +2,7 @@ package online.zust.qcqcqc.utils;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 
@@ -130,5 +131,16 @@ public interface IServiceEnhance<T> extends IService<T> {
         doCheckDependency(entity);
         return IService.super.removeById(entity);
     }
+
+    /**
+     * 根据lambda表达式查询分页数据
+     *
+     * @param page         分页信息
+     * @param size         分页信息
+     * @param queryWrapper 查询条件
+     * @param deep         深度
+     * @return 分页数据
+     */
+    Page<T> pageByLambda(Long page, Long size, QueryWrapper<T> queryWrapper, int deep);
 
 }
