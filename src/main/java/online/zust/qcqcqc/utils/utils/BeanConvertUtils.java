@@ -121,7 +121,7 @@ public class BeanConvertUtils {
                     HandleField annotation = declaredField.getAnnotation(HandleField.class);
                     Class<? extends FieldHandler> value = annotation.value();
                     // 从容器中获取
-                    ProxyUtil.getBean(value).doConvert(before, o, declaredField);
+                    ProxyUtil.getBean(value).doConvert(before, after, o, declaredField);
                 } catch (Exception e) {
                     log.error("字段转换失败", e);
                     throw new BeanConventException(e);

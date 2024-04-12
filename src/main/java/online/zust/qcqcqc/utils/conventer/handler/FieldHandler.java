@@ -18,5 +18,5 @@ public interface FieldHandler {
      *                          targetFieldObject 为目标字段的实例对象，targetField 为目标字段的 Field 对象
      *                          rawObject 为原始数据，rawObject.getClass().getDeclaredFields() 获取原始数据的所有字段
      */
-    void doConvert(Object rawObject, Object targetFieldObject, Field targetField);
+    void doConvert(Object rawObject,Object targetObject, Object targetFieldObject, Field targetField);
 }

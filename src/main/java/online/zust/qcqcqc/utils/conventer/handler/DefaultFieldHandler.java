@@ -14,8 +14,9 @@ import java.lang.reflect.Field;
 @Component
 public class DefaultFieldHandler implements FieldHandler {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DefaultFieldHandler.class);
+
     @Override
-    public void doConvert(Object rawObject, Object targetFieldObject, Field targetField) {
+    public void doConvert(Object rawObject, Object targetObject, Object targetFieldObject, Field targetField) {
         FromField annotation = targetField.getAnnotation(FromField.class);
         String s = annotation.fieldPath();
         Field[] declaredFields = rawObject.getClass().getDeclaredFields();

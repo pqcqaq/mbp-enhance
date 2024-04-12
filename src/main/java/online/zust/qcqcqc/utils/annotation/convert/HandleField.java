@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * Date: 2024/3/29
  * Time: 21:02
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface HandleField {
