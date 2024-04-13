@@ -11,6 +11,8 @@ import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
 import online.zust.qcqcqc.utils.exception.MbpEnhanceBeanRegisterError;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
@@ -26,7 +28,9 @@ import java.util.Set;
  * 实体类关系注册器，由此将entity关联注册到关联表中
  */
 @Component
-public class EntityRelaRegister implements DisposableBean {
+public class EntityRelaRegister implements DisposableBean, InitializingBean {
+    @Value("${mbp-enhance.debug:false}")
+    private Boolean debug;
     private static List<EnhanceService<?, ?>> enhanceServiceList;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(EntityRelaRegister.class);
 
@@ -38,7 +42,6 @@ public class EntityRelaRegister implements DisposableBean {
         initRelation();
         addRelaToTree();
         logger.info("实体类关联注册完成: {}", enhanceServiceList.stream().map(item -> item.getClass().getSimpleName()).toList());
-        printEntityTree();
     }
 
     private void printEntityTree() {
@@ -145,5 +148,12 @@ public class EntityRelaRegister implements DisposableBean {
     public void destroy() {
         EntityRelation.entityInfoMap.clear();
         EntityRelation.BaseEntity = EntityInfo.initEmptyEntityInfo();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (debug) {
+            printEntityTree();
+        }
     }
 }

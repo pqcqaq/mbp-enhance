@@ -1,15 +1,21 @@
 {
   "properties": [
     {
-      "name": "converter.type",
+      "name": "mbp-enhance.converter.type",
       "type": "java.lang.String",
       "description": "设置转换器类型.",
       "defaultValue": "jackson"
+    },
+    {
+      "name": "mbp-enhance.debug",
+      "type": "java.lang.Boolean",
+      "description": "是否启用Debug模式.",
+      "defaultValue": "false"
     }
   ],
   "hints": [
     {
-      "name": "converter.type",
+      "name": "mbp-enhance.converter.type",
       "values": [
         {
           "value": "fastjson",
@@ -22,6 +28,19 @@
         {
           "value": "jackson",
           "description": "使用jackson作为默认转换器."
+        }
+      ]
+    },
+    {
+      "name": "mbp-enhance.debug",
+      "values": [
+        {
+          "value": "true",
+          "description": "启用Debug输出."
+        },
+        {
+          "value": "false",
+          "description": "禁用Debug输出."
         }
       ]
     }

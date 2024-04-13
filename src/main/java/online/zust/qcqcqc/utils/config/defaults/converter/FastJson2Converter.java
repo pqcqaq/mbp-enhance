@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
  * @author qcqcqc
  */
 @Component
-@ConditionalOnProperty(prefix = "converter", name = "type", havingValue = "fastjson2")
+@ConditionalOnProperty(prefix = "mbp-enhance.converter", name = "type", havingValue = "fastjson2")
 public class FastJson2Converter implements JsonConverter {
     private static final FastJson2Converter INSTANCE = new FastJson2Converter();
 

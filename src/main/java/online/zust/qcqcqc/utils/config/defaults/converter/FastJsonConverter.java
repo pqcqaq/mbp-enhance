@@ -25,7 +25,7 @@ import java.util.Date;
  * @author qcqcqc
  */
 @Component
-@ConditionalOnProperty(prefix = "converter", name = "type", havingValue = "fastjson")
+@ConditionalOnProperty(prefix = "mbp-enhance.converter", name = "type", havingValue = "fastjson")
 public class FastJsonConverter implements JsonConverter {
     private static final FastJsonConverter INSTANCE = new FastJsonConverter();
 
