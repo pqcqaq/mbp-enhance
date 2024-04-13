@@ -287,7 +287,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             boolean equals = "BaseEntity".equals(superclass.getSimpleName());
             if (equals) {
                 try {
-                    Field id = superclass.getField("id");
+                    Field id = superclass.getDeclaredField("id");
                     id.setAccessible(true);
                     doCheckDependency((Serializable) id.get(entity));
                 } catch (Exception e) {
@@ -413,7 +413,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         Class<? extends EnhanceService> service = otMDeepSearch.service();
         // field是自身的唯一标识，baseId是另一张表中用于关联这张表的字段名
         EnhanceService bean = ProxyUtil.getBean(service);
-        Field declaredField1 = aClass.getDeclaredField(field);
+        Field declaredField1 = getDeclaredField(aClass, field);
         declaredField1.setAccessible(true);
         Object value = declaredField1.get(entity);
         if (value instanceof Long l) {
@@ -438,6 +438,27 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
                 log.error("类: " + entity.getClass().getCanonicalName() + "中的字段: " + declaredField.getName() + " 值不是Long类型，无法作为id查询");
             }
         }
+    }
+
+    private Field getDeclaredField(Class<?> aClass, String field) {
+        Field declaredField = null;
+        try {
+            declaredField = aClass.getDeclaredField(field);
+        } catch (Exception e) {
+            Class superclass = aClass.getSuperclass();
+            boolean equals = "BaseEntity".equals(superclass.getSimpleName());
+            if (equals) {
+                try {
+                    declaredField = superclass.getDeclaredField(field);
+                } catch (Exception ex) {
+                    log.error("没有找到字段: " + field);
+                }
+            }
+        }
+        if (declaredField == null) {
+            throw new ErrorDeepSearchException("没有找到字段: " + field);
+        }
+        return declaredField;
     }
 
     private void handleMtMAnnotation(T entity, Field deepSearchField, Class<?> aClass, int deep) {
@@ -480,11 +501,11 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         // 获取entity的id，构造查询条件，relaService中查找对应的全部id
         String name = deepSearchList.targetField();
         name = FieldNameConvertUtils.camelToUnderline(name);
-        Field declaredField = aClass.getDeclaredField(name);
+        Field declaredField = getDeclaredField(aClass, name);
         Class<?> superclass = aClass.getSuperclass();
         boolean equals = "BaseEntity".equals(superclass.getSimpleName());
         if (equals) {
-            Field id = superclass.getField("id");
+            Field id = superclass.getDeclaredField("id");
             id.setAccessible(true);
             declaredField = id;
         } else {
@@ -580,7 +601,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         // 获取service的实例
         EnhanceService bean = ProxyUtil.getBean(service);
         // 名为field的字段的值
-        Field declaredField = aClass.getDeclaredField(field);
+        Field declaredField = getDeclaredField(aClass, field);
         declaredField.setAccessible(true);
         Object value = declaredField.get(entity);
         if (value instanceof Long l) {
@@ -597,7 +618,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
                 Class superclass = entityClass1.getSuperclass();
                 boolean equals = "BaseEntity".equals(superclass.getSimpleName());
                 if (equals) {
-                    Field id = superclass.getField("id");
+                    Field id = superclass.getDeclaredField("id");
                     id.setAccessible(true);
                     idField = id.getName();
                 } else {
