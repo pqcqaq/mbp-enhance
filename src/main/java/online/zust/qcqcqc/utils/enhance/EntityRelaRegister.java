@@ -140,7 +140,11 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
             }
         }
         if (!hasTableId) {
-            throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
+            Class<?> superclass = entityClass.getSuperclass();
+            boolean equals = "BaseEntity".equals(superclass.getSimpleName());
+            if (!equals) {
+                throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
+            }
         }
     }
 
