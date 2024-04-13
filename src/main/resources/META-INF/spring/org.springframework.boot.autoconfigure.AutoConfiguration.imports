@@ -6,5 +6,4 @@ online.zust.qcqcqc.utils.config.defaults.converter.JacksonConverter
 online.zust.qcqcqc.utils.utils.ProxyUtil
 online.zust.qcqcqc.utils.enhance.EntityRelaRegister
 online.zust.qcqcqc.utils.enhance.checker.CheckHandler
-online.zust.qcqcqc.utils.enhance.checker.DefaultCheckerConfig
 online.zust.qcqcqc.utils.enhance.searcher.GeneralEntitySearcher

@@ -32,15 +32,19 @@ public class CheckHandler {
     public CheckHandler(CheckerConfig checkerConfig) {
         if (checkerConfig == null) {
             logger.warn("未找到CheckerConfig的实现类，无法进行依赖检查");
+            CheckHandler.checkerConfig = new DefaultCheckerConfig();
+        } else {
+            logger.info(checkerConfig.getClass().getSimpleName() + "已配置，将用于依赖检查");
+            CheckHandler.checkerConfig = checkerConfig;
         }
-        CheckHandler.checkerConfig = checkerConfig;
+    }
+
+    public CheckHandler() {
+        logger.warn("未配置CheckerConfig的实现类，无法进行依赖检查");
+        CheckHandler.checkerConfig = new DefaultCheckerConfig();
     }
 
     public static void doCheck(EnhanceService service, Serializable id) throws DependencyCheckException {
-        if (checkerConfig == null) {
-            logger.warn("未找到CheckerConfig的实现类，无法进行依赖检查");
-            return;
-        }
         Class<? extends EnhanceService> aClass = service.getClass();
         EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(aClass);
         if (entityInfo == null) {

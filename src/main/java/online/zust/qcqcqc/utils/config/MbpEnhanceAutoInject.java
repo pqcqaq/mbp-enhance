@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Import;
         JacksonConverter.class,
         EntityRelaRegister.class,
         CheckHandler.class,
-        DefaultCheckerConfig.class,
         GeneralEntitySearcher.class
 })
 public class MbpEnhanceAutoInject {

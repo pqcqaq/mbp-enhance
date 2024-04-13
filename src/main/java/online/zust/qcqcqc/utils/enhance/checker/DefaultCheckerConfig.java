@@ -11,8 +11,6 @@ import java.util.List;
  * Date: 2024/4/3
  * Time: 21:43
  */
-@Component
-@ConditionalOnMissingBean(CheckerConfig.class)
 public class DefaultCheckerConfig implements CheckerConfig {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DefaultCheckerConfig.class);
 
