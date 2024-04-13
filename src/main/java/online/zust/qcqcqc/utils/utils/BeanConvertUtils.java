@@ -106,7 +106,7 @@ public class BeanConvertUtils {
         Field[] declaredFields = after.getClass().getDeclaredFields();
         // 获取有指定注解并且为null的字段
         for (Field declaredField : declaredFields) {
-            if (declaredField.getName().equals("serialVersionUID")) {
+            if (isFieldIgnore(declaredField)) {
                 continue;
             }
             RequireDefault defaultAnnotation = declaredField.getAnnotation(RequireDefault.class);
@@ -115,17 +115,7 @@ public class BeanConvertUtils {
                 continue;
             }
             if (declaredField.isAnnotationPresent(HandleField.class)) {
-                try {
-                    declaredField.setAccessible(true);
-                    Object o = declaredField.get(after);
-                    HandleField annotation = declaredField.getAnnotation(HandleField.class);
-                    Class<? extends FieldHandler> value = annotation.value();
-                    // 从容器中获取
-                    ProxyUtil.getBean(value).doConvert(before, after, o, declaredField);
-                } catch (Exception e) {
-                    log.error("字段转换失败", e);
-                    throw new BeanConventException(e);
-                }
+                parseHandler(before, after, declaredField);
                 continue;
             }
 
@@ -139,76 +129,9 @@ public class BeanConvertUtils {
                 }
                 // 获取字段类型名称
                 String fieldName = declaredField.getType().getName();
-                // 如果字段为自定义类型,而不是java自带类型,则进行递归赋值
-                if (!fieldName.startsWith("java") && !declaredField.getType().isEnum()) {
-                    // 这里只会进行自定义类型的递归赋值，避免了list之类的问题
-                    String name = getFieldNameFromAnnotation(declaredField, nullable);
-                    // 如果没有注解或者是采用深层次查找，则直接略过，因为在上面已经处理过了
-                    if (name == null || name.contains(".")) {
-                        continue;
-                    }
-                    // 根据注解获取字段值（已经指定了数据源，则从原始对象中获取字段值，再转换到目标对象）
-                    Field field = before.getClass().getDeclaredField(name);
-                    field.setAccessible(true);
-                    Object value = field.get(before);
-                    // 如果字段值不为null,则进行递归赋值
-                    if (value != null) {
-                        fieldConvent(value, declaredField.get(after), nullable);
-                    }
-                } else {
-                    // 如果是java开头的字段，则需要判断一下是不是List类型或者是数组类型
-                    if (fieldName.startsWith("java.util.List")) {
-                        // 检查原始数据中是否有字段
-                        // 转为数组并进行递归赋值
-                        List<?> list = (List<?>) declaredField.get(after);
-                        // 在原始对象中查找同名的字段或者根据注解查找字段
-                        String name = getFieldNameFromAnnotation(declaredField, nullable);
-                        // 如果没有注解或者是采用深层次查找，则直接略过，因为在上面已经处理过了
-                        if (name == null || name.contains(".")) {
-                            continue;
-                        }
-                        Field field = before.getClass().getDeclaredField(name);
-                        field.setAccessible(true);
-                        List<?> listValue = (List<?>) field.get(before);
-                        // 判断原始对象中的字段是否为空，如果为空则直接略过
-                        if (listValue == null) {
-                            // 如果走到了这一步，则一定是不包含深层指定的一个简单数组转换，如果直接是null，那么目标对象肯定需要一个空数组（目标对象不一定是null，可能存在字段重复，这里直接进行覆盖）
-                            declaredField.set(after, List.of());
-                            continue;
-                        }
-                        if (listValue.isEmpty()) {
-                            continue;
-                        }
-                        // 原数组有数据且不为空，目标数组为null的情况，直接赋值为一个空数组
-                        if (list == null) {
-                            declaredField.set(after, List.of());
-                            continue;
-                        }
-                        // 判断是不是基本类型(原始对象中)
-                        Object o = listValue.get(0);
-                        if (o == null || o.getClass().getName().startsWith("java")) {
-                            // 如果是基本类型，直接略过，因为最开始做转换的时候肯定已经有值了（上面处理自定义注解时赋值）
-                            continue;
-                        }
-
-                        // 这里不需要在判断是否为null了，因为前面已经赋值为了一个空数组
-                        // 也不需要判断是否长度不相等了，因为可能原始已经赋值，这里需要覆盖掉
-                        // 如果字段值不为null,则将原始对象和目标对象的List进行遍历递归赋值
-                        log.debug("尝试转换List字段，从原始对象字段{}转换到目标对象字段{}", field.getName(), declaredField.getName());
-                        // 如果字段值不为null,则进行递归赋值
-                        Class<?> targetClass;
-                        if (!list.isEmpty()) {
-                            // 从第一个元素中获取
-                            targetClass = list.get(0).getClass();
-                        } else {
-                            // 从数组的泛型信息中获取，而不是从第一个元素中获取
-                            Type genericType = declaredField.getGenericType();
-                            targetClass = genericType.getClass();
-                        }
-                        List<?> list1 = listValue.stream().map(item -> objectConvent(item, targetClass)).toList();
-                        declaredField.set(after, list1);
-                    }
-                }
+                // 处理字段
+                handleField(before, after, nullable, declaredField, fieldName);
+                // 处理完之后再次判断是否需要设置默认值
                 if (defaultAnnotation != null && declaredField.get(after) == null) {
                     setDefaultValue(after, declaredField);
                 }
@@ -219,6 +142,165 @@ public class BeanConvertUtils {
 
         }
         return after;
+    }
+
+    /**
+     * 处理字段
+     *
+     * @param before        源对象
+     * @param after         目标对象
+     * @param nullable      是否允许字段为null
+     * @param declaredField 字段
+     * @param fieldName     字段名
+     * @param <A>           目标对象类型
+     * @param <B>           源对象类型
+     * @throws NoSuchFieldException   无法找到字段
+     * @throws IllegalAccessException 无法访问字段
+     */
+    private static <A, B> void handleField(B before, A after, boolean nullable, Field declaredField, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+        // 如果字段为自定义类型,而不是java自带类型,则进行递归赋值
+        if (!fieldName.startsWith("java") && !declaredField.getType().isEnum()) {
+            // 这里只会进行自定义类型的递归赋值，避免了list之类的问题
+            String name = getFieldNameFromAnnotation(declaredField, nullable);
+            // 如果没有注解或者是采用深层次查找，则直接略过，因为在上面已经处理过了
+            if (name == null || name.contains(".")) {
+                return;
+            }
+            handleCustomType(before, after, nullable, declaredField, name);
+        } else {
+            // 如果是java开头的字段，则需要判断一下是不是List类型或者是数组类型
+            if (fieldName.startsWith("java.util.List")) {
+                handleListType(before, after, nullable, declaredField);
+            }
+        }
+    }
+
+    /**
+     * 处理List类型
+     *
+     * @param before        源对象
+     * @param after         目标对象
+     * @param nullable      是否允许字段为null
+     * @param declaredField 字段
+     * @param <A>           目标对象类型
+     * @param <B>           源对象类型
+     * @throws IllegalAccessException 无法访问字段
+     * @throws NoSuchFieldException   无法找到字段
+     */
+    private static <A, B> void handleListType(B before, A after, boolean nullable, Field declaredField) throws IllegalAccessException, NoSuchFieldException {
+        // 检查原始数据中是否有字段
+        // 转为数组并进行递归赋值
+        List<?> list = (List<?>) declaredField.get(after);
+        // 在原始对象中查找同名的字段或者根据注解查找字段
+        String name = getFieldNameFromAnnotation(declaredField, nullable);
+        // 如果没有注解或者是采用深层次查找，则直接略过，因为在上面已经处理过了
+        if (name == null || name.contains(".")) {
+            return;
+        }
+        Field field = before.getClass().getDeclaredField(name);
+        field.setAccessible(true);
+        List<?> listValue = (List<?>) field.get(before);
+        // 判断原始对象中的字段是否为空，如果为空则直接略过
+        if (listValue == null) {
+            // 如果走到了这一步，则一定是不包含深层指定的一个简单数组转换，如果直接是null，那么目标对象肯定需要一个空数组（目标对象不一定是null，可能存在字段重复，这里直接进行覆盖）
+            declaredField.set(after, List.of());
+            return;
+        }
+        if (listValue.isEmpty()) {
+            return;
+        }
+        // 原数组有数据且不为空，目标数组为null的情况，直接赋值为一个空数组
+        if (list == null) {
+            declaredField.set(after, List.of());
+            return;
+        }
+        // 判断是不是基本类型(原始对象中)
+        Object o = listValue.get(0);
+        if (o == null || o.getClass().getName().startsWith("java")) {
+            // 如果是基本类型，直接略过，因为最开始做转换的时候肯定已经有值了（上面处理自定义注解时赋值）
+            return;
+        }
+
+        // 这里不需要在判断是否为null了，因为前面已经赋值为了一个空数组
+        // 也不需要判断是否长度不相等了，因为可能原始已经赋值，这里需要覆盖掉
+        // 如果字段值不为null,则将原始对象和目标对象的List进行遍历递归赋值
+        log.debug("尝试转换List字段，从原始对象字段{}转换到目标对象字段{}", field.getName(), declaredField.getName());
+        // 如果字段值不为null,则进行递归赋值
+        Class<?> targetClass;
+        if (!list.isEmpty()) {
+            // 从第一个元素中获取
+            targetClass = list.get(0).getClass();
+        } else {
+            // 从数组的泛型信息中获取，而不是从第一个元素中获取
+            Type genericType = declaredField.getGenericType();
+            targetClass = genericType.getClass();
+        }
+        List<?> list1 = listValue.stream().map(item -> objectConvent(item, targetClass)).toList();
+        declaredField.set(after, list1);
+    }
+
+    /**
+     * 处理自定义类型
+     *
+     * @param before        源对象
+     * @param after         目标对象
+     * @param nullable      是否允许字段为null
+     * @param declaredField 字段
+     * @param name          字段名
+     * @param <A>           目标对象类型
+     * @param <B>           源对象类型
+     * @throws NoSuchFieldException   无法找到字段
+     * @throws IllegalAccessException 无法访问字段
+     */
+    private static <A, B> void handleCustomType(B before, A after, boolean nullable, Field declaredField, String name) throws NoSuchFieldException, IllegalAccessException {
+        // 根据注解获取字段值（已经指定了数据源，则从原始对象中获取字段值，再转换到目标对象）
+        Class<?> aClass = before.getClass();
+        Field field = aClass.getDeclaredField(name);
+        field.setAccessible(true);
+        Object value = field.get(before);
+        if (value == null) {
+            // 如果原始数据的字段值为null,则直接略过
+            return;
+        }
+        boolean annotationPresent = declaredField.getType().isAnnotationPresent(CustomConvert.class);
+        if (!annotationPresent) {
+            // 如果是自定义类型，则进行递归赋值
+            log.debug("尝试转换自定义字段，从原始对象字段{}转换到目标对象字段{}，但目标类型{}未设置自定义转换注解CustomConvert", field.getName(), declaredField.getName(), declaredField.getType());
+        }
+        fieldConvent(value, declaredField.get(after), nullable);
+    }
+
+    /**
+     * 解析处理器
+     *
+     * @param before        源对象
+     * @param after         目标对象
+     * @param declaredField 字段
+     * @param <A>           目标对象类型
+     * @param <B>           源对象类型
+     */
+    private static <A, B> void parseHandler(B before, A after, Field declaredField) {
+        try {
+            declaredField.setAccessible(true);
+            Object o = declaredField.get(after);
+            HandleField annotation = declaredField.getAnnotation(HandleField.class);
+            Class<? extends FieldHandler> value = annotation.value();
+            // 从容器中获取
+            ProxyUtil.getBean(value).doConvert(before, after, o, declaredField);
+        } catch (Exception e) {
+            log.error("字段转换失败", e);
+            throw new BeanConventException(e);
+        }
+    }
+
+    /**
+     * 判断是否为忽略字段
+     *
+     * @param declaredField 字段
+     * @return 是否为忽略字段
+     */
+    private static boolean isFieldIgnore(Field declaredField) {
+        return "serialVersionUID".equals(declaredField.getName());
     }
 
     /**
