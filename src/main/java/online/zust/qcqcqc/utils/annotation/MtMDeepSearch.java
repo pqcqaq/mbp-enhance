@@ -29,11 +29,11 @@ public @interface MtMDeepSearch {
      */
     String targetId();
 
-    /**
-     * 目标字段（表字段名）
-     * @return 目标字段
-     */
-    String targetField() default "id";
+//    /**
+//     * 目标字段（表字段名）
+//     * @return 目标字段
+//     */
+//    String targetField() default "id";
 
     /**
      * 关联服务

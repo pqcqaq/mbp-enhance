@@ -11,10 +11,9 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
     private final Map<EntityInfo, List<Field>> otoPreviousFieldMap;
     private final Map<EntityInfo, List<Field>> otmPreviousFieldMap;
     private final Map<EntityInfo, List<Field>> mtmPreviousFieldMap;
-    private final Set<EntityInfo> previous;
     private Class<E> entityClass;
+    private Field idField;
     private S service;
-    private final Set<EntityInfo> next;
     private final Map<EntityInfo, List<Field>> otoNextFieldMap;
     private final Map<EntityInfo, List<Field>> otmNextFieldMap;
     private final Map<EntityInfo, List<Field>> mtmNextFieldMap;
@@ -23,13 +22,20 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
         this.otoPreviousFieldMap = new HashMap<>();
         this.otmPreviousFieldMap = new HashMap<>();
         this.mtmPreviousFieldMap = new HashMap<>();
-        this.previous = new HashSet<>();
         this.entityClass = null;
+        this.idField = null;
         this.service = null;
-        this.next = new HashSet<>();
         this.otoNextFieldMap = new HashMap<>();
         this.otmNextFieldMap = new HashMap<>();
         this.mtmNextFieldMap = new HashMap<>();
+    }
+
+    public Field getIdField() {
+        return idField;
+    }
+
+    public void setIdField(Field idField) {
+        this.idField = idField;
     }
 
     public void addOtOPreviousField(EntityInfo entityInfo, Field annotation) {
@@ -78,23 +84,6 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
 
     public Map<EntityInfo, List<Field>> getMtmNextFieldMap() {
         return mtmNextFieldMap;
-    }
-
-
-    public void addPrevious(EntityInfo entityInfo) {
-        previous.add(entityInfo);
-    }
-
-    public void addNext(EntityInfo entityInfo) {
-        next.add(entityInfo);
-    }
-
-    public Set<EntityInfo> getPrevious() {
-        return previous;
-    }
-
-    public Set<EntityInfo> getNext() {
-        return next;
     }
 
     public Class<E> getEntityClass() {

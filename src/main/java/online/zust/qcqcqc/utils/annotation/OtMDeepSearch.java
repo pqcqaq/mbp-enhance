@@ -13,12 +13,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface OtMDeepSearch {
-    /**
-     * 自身id (类字段名)
-     *
-     * @return 自身id
-     */
-    String field() default "id";
+//    /**
+//     * 自身id (类字段名)
+//     *
+//     * @return 自身id
+//     */
+//    String field() default "id";
 
     /**
      * 基础id（表字段名）

@@ -46,7 +46,7 @@ public class CheckHandler {
 
     public static void doCheck(EnhanceService service, Serializable id) throws DependencyCheckException {
         Class<? extends EnhanceService> aClass = service.getClass();
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(aClass);
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.getEntityInfoMap().get(aClass);
         if (entityInfo == null) {
             throw new DependencyCheckException("未找到对应的实体类关系信息");
         }

@@ -3,13 +3,14 @@ package online.zust.qcqcqc.utils.enhance.searcher;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.baomidou.mybatisplus.extension.parser.JsqlParserFunction;
 import online.zust.qcqcqc.utils.EnhanceService;
 import online.zust.qcqcqc.utils.enhance.EntityInfo;
 import online.zust.qcqcqc.utils.enhance.EntityRelation;
+import online.zust.qcqcqc.utils.exception.ErrorSearchException;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -119,6 +120,20 @@ public class GeneralEntitySearcher {
      * @return 分页数据
      */
     public static <E> E getLatest(Class<E> entityClass) {
+        boolean equals = "BaseEntity".equals(entityClass.getSuperclass().getSimpleName());
+        if (!equals) {
+            Field[] declaredFields = entityClass.getDeclaredFields();
+            boolean hasCreateTime = false;
+            for (Field declaredField : declaredFields) {
+                if ("createTime".equals(declaredField.getName())) {
+                    hasCreateTime = true;
+                    break;
+                }
+            }
+            if (!hasCreateTime) {
+                throw new ErrorSearchException("实体类" + entityClass.getSimpleName() + "未设置create_time字段");
+            }
+        }
         EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByClass(entityClass);
         if (entityInfoByClass == null) {
             return null;

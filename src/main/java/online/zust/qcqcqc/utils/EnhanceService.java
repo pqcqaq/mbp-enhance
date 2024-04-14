@@ -1,6 +1,5 @@
 package online.zust.qcqcqc.utils;
 
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,6 +17,8 @@ import online.zust.qcqcqc.utils.annotation.LastSqlOnSearch;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
+import online.zust.qcqcqc.utils.enhance.EntityInfo;
+import online.zust.qcqcqc.utils.enhance.EntityRelation;
 import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
 import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
@@ -242,34 +243,22 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
             return null;
         }
         Class<?> aClass = entity.getClass();
-        Field[] declaredFields = aClass.getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            if (declaredField.isAnnotationPresent(OtODeepSearch.class)) {
-                handleOtOAnnotation(entity, declaredField, aClass, deep);
-            }
-            if (declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
-                handleMtMAnnotation(entity, declaredField, aClass, deep);
-            }
-            if (declaredField.isAnnotationPresent(OtMDeepSearch.class)) {
-                handleOtMAnnotation(entity, declaredField, aClass, deep);
-            }
-        }
-//        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.entityInfoMap.get(getClass());
-//        entityInfo.getOtoNextFieldMap().forEach((entityInfo1, fields) -> {
-//            fields.forEach(field -> {
-//                handleOtOAnnotation(entity, field, aClass, deep);
-//            });
-//        });
-//        entityInfo.getOtmNextFieldMap().forEach((entityInfo1, fields) -> {
-//            fields.forEach(field -> {
-//                handleOtMAnnotation(entity, field, aClass, deep);
-//            });
-//        });
-//        entityInfo.getMtmNextFieldMap().forEach((entityInfo1, fields) -> {
-//            fields.forEach(field -> {
-//                handleMtMAnnotation(entity, field, aClass, deep);
-//            });
-//        });
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.getEntityInfoMap().get(getClass());
+        entityInfo.getOtoNextFieldMap().forEach((entityInfo1, fields) -> {
+            fields.forEach(field -> {
+                handleOtOAnnotation(entity, field, aClass, deep);
+            });
+        });
+        entityInfo.getOtmNextFieldMap().forEach((entityInfo1, fields) -> {
+            fields.forEach(field -> {
+                handleOtMAnnotation(entity, field, aClass, deep);
+            });
+        });
+        entityInfo.getMtmNextFieldMap().forEach((entityInfo1, fields) -> {
+            fields.forEach(field -> {
+                handleMtMAnnotation(entity, field, aClass, deep);
+            });
+        });
         return entity;
     }
 
@@ -280,36 +269,24 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
 
     @Override
     public void doCheckDependency(T entity) throws DependencyCheckException {
-        if (entity.getClass().getPackageName().startsWith("java")) {
+        Class<?> aClass = entity.getClass();
+        if (aClass.getPackageName().startsWith("java")) {
             doCheckDependency((Serializable) entity);
         } else {
-            Class<?> superclass = entity.getClass().getSuperclass();
-            boolean equals = "BaseEntity".equals(superclass.getSimpleName());
-            if (equals) {
-                try {
-                    Field id = superclass.getDeclaredField("id");
-                    id.setAccessible(true);
-                    doCheckDependency((Serializable) id.get(entity));
-                } catch (Exception e) {
-                    throw new DependencyCheckException("从实体类的父类中获取id失败");
-                }
+            EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = EntityRelation.getEntityInfos().get(aClass);
+            if (entityInfo == null) {
+                throw new DependencyCheckException("没有找到实体类: " + aClass.getCanonicalName());
             }
-            Field[] declaredFields = entity.getClass().getDeclaredFields();
-            boolean find = false;
-            for (Field declaredField : declaredFields) {
-                if (declaredField.isAnnotationPresent(TableId.class)) {
-                    declaredField.setAccessible(true);
-                    try {
-                        doCheckDependency((Serializable) declaredField.get(entity));
-                    } catch (IllegalAccessException e) {
-                        throw new DependencyCheckException(e.getMessage());
-                    }
-                    find = true;
-                    break;
-                }
+            if (!entityInfo.getEntityClass().getSimpleName().equals(getEntityClass().getSimpleName())) {
+                throw new DependencyCheckException("实体类不匹配");
             }
-            if (!find) {
-                throw new DependencyCheckException("没有找到id字段");
+            Field idField = entityInfo.getIdField();
+            idField.setAccessible(true);
+            try {
+                Serializable id = (Serializable) idField.get(entity);
+                doCheckDependency(id);
+            } catch (IllegalAccessException e) {
+                throw new DependencyCheckException("执行依赖检查失败: " + e.getMessage());
             }
         }
     }
@@ -406,14 +383,12 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
 
     private void deepSearchListAndSetValue(T entity, Field declaredField, Class<?> aClass, OtMDeepSearch otMDeepSearch, int deep)
             throws NoSuchFieldException, IllegalAccessException {
-        String field = otMDeepSearch.field();
-        field = FieldNameConvertUtils.underlineToCamel(field);
         String baseId = otMDeepSearch.baseId();
         baseId = FieldNameConvertUtils.camelToUnderline(baseId);
         Class<? extends EnhanceService> service = otMDeepSearch.service();
         // field是自身的唯一标识，baseId是另一张表中用于关联这张表的字段名
         EnhanceService bean = ProxyUtil.getBean(service);
-        Field declaredField1 = getDeclaredField(aClass, field);
+        Field declaredField1 = EntityRelation.getEntityInfos().get(aClass).getIdField();
         declaredField1.setAccessible(true);
         Object value = declaredField1.get(entity);
         if (value instanceof Long l) {
@@ -492,38 +467,16 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
 
     private <T> void deepSearchListAndSetValue(T entity, Field deepSearchField, Class<?> aClass, MtMDeepSearch deepSearchList, int deep)
             throws NoSuchFieldException, IllegalAccessException {
+        // 流程：获取entity的id，构造查询条件，relaService中查找对应的全部id，targetService中查找全部id对应的实体
         Class<? extends EnhanceService> relaService = deepSearchList.relaService();
         Class<? extends EnhanceService> targetService = deepSearchList.targetService();
         String column = deepSearchList.baseId();
         column = FieldNameConvertUtils.camelToUnderline(column);
+        // 目标对象在关系表中的字段名
         String targetIdFieldName = deepSearchList.targetId();
         targetIdFieldName = FieldNameConvertUtils.underlineToCamel(targetIdFieldName);
         // 获取entity的id，构造查询条件，relaService中查找对应的全部id
-        String name = deepSearchList.targetField();
-        name = FieldNameConvertUtils.camelToUnderline(name);
-        Field declaredField = getDeclaredField(aClass, name);
-        Class<?> superclass = aClass.getSuperclass();
-        boolean equals = "BaseEntity".equals(superclass.getSimpleName());
-        if (equals) {
-            Field id = superclass.getDeclaredField("id");
-            id.setAccessible(true);
-            declaredField = id;
-        } else {
-            if (declaredField == null) {
-                // 字段上是否有TableId注解
-                Field[] declaredFields = aClass.getDeclaredFields();
-                for (Field declaredField1 : declaredFields) {
-                    if (declaredField1.isAnnotationPresent(TableId.class)) {
-                        declaredField = declaredField1;
-                        break;
-                    }
-                }
-                if (declaredField == null) {
-                    throw new ErrorDeepSearchException("没有找到id字段");
-                }
-            }
-        }
-
+        Field declaredField = EntityRelation.getEntityInfos().get(aClass).getIdField();
         // 获取值declaredField的值
         declaredField.setAccessible(true);
         Object value = declaredField.get(entity);
@@ -532,21 +485,22 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         }
         Long baseId = (Long) value;
         EnhanceService relaServiceImpl = ProxyUtil.getBean(relaService);
-        String finalTargetIdFieldName = targetIdFieldName;
+        final String finalTargetIdFieldName = targetIdFieldName;
+        // 这里list出来的是一堆关联对象，需要根据这些对象的目标id去查找对应的实体
         List<Long> targetIds = relaServiceImpl.list(new QueryWrapper<>().eq(column, baseId)).stream().map(e -> {
             try {
                 Field declaredField1 = e.getClass().getDeclaredField(finalTargetIdFieldName);
                 declaredField1.setAccessible(true);
                 return (Long) declaredField1.get(e);
             } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
-                noSuchFieldException.printStackTrace();
+                log.error("获取字段值失败: ", noSuchFieldException);
                 return null;
             }
         }).toList();
 
         if (targetIds.isEmpty()) {
             if (deepSearchList.notNull()) {
-                throw new ErrorDeepSearchException("没有找到对应的id");
+                throw new ErrorDeepSearchException("没有在关联表找到对应的目标对象id");
             }
             return;
         }
@@ -556,26 +510,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         if (annotation == null || annotation.value().trim().isEmpty()) {
             list = targetServiceImpl.listByIds(targetIds, deep - 1);
         } else {
-            String idFieldName = null;
-            Class entityClass1 = targetServiceImpl.getEntityClass();
-            Field[] declaredFields = entityClass1.getDeclaredFields();
-            Class superclass1 = entityClass1.getSuperclass();
-            boolean equals1 = "BaseEntity".equals(superclass1.getSimpleName());
-            if (equals1) {
-                Field id = superclass1.getDeclaredField("id");
-                id.setAccessible(true);
-                idFieldName = id.getName();
-            } else {
-                for (Field declaredField1 : declaredFields) {
-                    if (declaredField1.isAnnotationPresent(TableId.class)) {
-                        idFieldName = declaredField1.getName();
-                        break;
-                    }
-                }
-            }
-            if (idFieldName == null) {
-                throw new ErrorDeepSearchException("没有在类型 " + entityClass1.getSimpleName() + " 中找到id字段");
-            }
+            String idFieldName = EntityRelation.getEntityInfos().get(targetServiceImpl.getEntityClass()).getIdField().getName();
             QueryWrapper queryWrapper = new QueryWrapper();
             queryWrapper.in(FieldNameConvertUtils.camelToUnderline(idFieldName), targetIds);
             queryWrapper.last(annotation.value());
@@ -592,7 +527,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
     private <T> void deepSearchEntityAndSetValue(T entity, Field deepSearchField, Class<?> aClass, OtODeepSearch annotation, int deep) throws NoSuchFieldException, IllegalAccessException {
         // 获取注解中的字段
         String field = annotation.baseId();
-        if (field.isEmpty()) {
+        if (field.trim().isEmpty()) {
             field = deepSearchField.getName() + "Id";
         }
         field = FieldNameConvertUtils.underlineToCamel(field);
@@ -614,24 +549,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
                 // 获取service的getOne方法
                 Class entityClass1 = bean.getEntityClass();
                 Field[] declaredFields = entityClass1.getDeclaredFields();
-                String idField = null;
-                Class superclass = entityClass1.getSuperclass();
-                boolean equals = "BaseEntity".equals(superclass.getSimpleName());
-                if (equals) {
-                    Field id = superclass.getDeclaredField("id");
-                    id.setAccessible(true);
-                    idField = id.getName();
-                } else {
-                    for (Field declaredField1 : declaredFields) {
-                        if (declaredField1.isAnnotationPresent(TableId.class)) {
-                            idField = declaredField1.getName();
-                            break;
-                        }
-                    }
-                }
-                if (idField == null) {
-                    throw new ErrorDeepSearchException("没有在类型 " + entityClass1.getSimpleName() + " 中找到id字段");
-                }
+                String idField = EntityRelation.getEntityInfos().get(entityClass1).getIdField().getName();
                 QueryWrapper queryWrapper = new QueryWrapper();
                 queryWrapper.eq(FieldNameConvertUtils.camelToUnderline(idField), l);
                 queryWrapper.last(lastSql.value());

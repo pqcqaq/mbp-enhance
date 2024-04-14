@@ -3,6 +3,7 @@ package online.zust.qcqcqc.utils.enhance;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -14,26 +15,73 @@ import java.util.logging.Logger;
  */
 public class EntityRelation {
     private static final Logger logger = Logger.getLogger(EntityRelation.class.getName());
-    public static Map<Class<? extends EnhanceService<?, ?>>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> entityInfoMap = new HashMap<>();
-    public static EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> BaseEntity = EntityInfo.initEmptyEntityInfo();
+    private static final Map<Class<? extends EnhanceService<?, ?>>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> entityInfoMap = new HashMap<>();
+
+    private static final Map<Class<?>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> entitysMap = new HashMap<>();
+    private static EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> BaseEntity = EntityInfo.initEmptyEntityInfo();
+
+    public static Map<Class<? extends EnhanceService<?, ?>>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getEntityInfoMap() {
+        return entityInfoMap;
+    }
+
+    public static Map<Class<?>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> getEntityInfos() {
+        return entitysMap;
+    }
+
+    public static EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> getEntityInfoByEntityClass(Class<?> clazz) {
+        return entitysMap.get(clazz);
+    }
+
+    public static EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> getBaseEntity() {
+        return BaseEntity;
+    }
+
+    public static void setBaseEntity(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> baseEntity) {
+        BaseEntity = baseEntity;
+    }
+
+    public static void destroy() {
+        entityInfoMap.clear();
+        BaseEntity = EntityInfo.initEmptyEntityInfo();
+    }
 
     public static <E, S extends EnhanceService<M, E>, M extends BaseMapper<E>> void printEntityTree(EntityInfo<E, S, M> entityInfo, int depth, Set<EntityInfo<?, ?, ?>> visited) {
+        printEntityTree("Base", entityInfo, depth, visited);
+    }
+
+    public static <E, S extends EnhanceService<M, E>, M extends BaseMapper<E>> void printEntityTree(String type, EntityInfo<E, S, M> entityInfo, int depth, Set<EntityInfo<?, ?, ?>> visited) {
         // 打印当前节点
         String sb = "  ".repeat(Math.max(0, depth - 1));
-        System.out.println(sb + "|--" + entityInfo.getEntityClass().getSimpleName());
+        System.out.println(sb + type + "|--" + entityInfo.getEntityClass().getSimpleName());
 
         // 将当前节点标记为已访问
         visited.add(entityInfo);
 
         // 获取下一个节点列表
-        Set<EntityInfo> nextNodes = entityInfo.getNext();
+        Map<EntityInfo, List<Field>> otoNextFieldMap = entityInfo.getOtoNextFieldMap();
+        Map<EntityInfo, List<Field>> otmNextFieldMap = entityInfo.getOtmNextFieldMap();
+        Map<EntityInfo, List<Field>> mtmNextFieldMap = entityInfo.getMtmNextFieldMap();
 
-        // 递归打印下一个节点
-        for (EntityInfo nextNode : nextNodes) {
-            if (!visited.contains(nextNode)) { // 如果下一个节点未被访问过
-                printEntityTree(nextNode, depth + 1, new HashSet<>(visited));
+        for (EntityInfo nextNode : otoNextFieldMap.keySet()) {
+            if (!visited.contains(nextNode)) {
+                printEntityTree("OtO: ", nextNode, depth + 1, new HashSet<>(visited));
             } else {
-                // 在遇到已访问过的节点时，打印特殊标记，表示存在环
+                System.out.println("  (Cycle Detected: " + nextNode.getEntityClass().getSimpleName() + ")");
+            }
+        }
+
+        for (EntityInfo nextNode : otmNextFieldMap.keySet()) {
+            if (!visited.contains(nextNode)) {
+                printEntityTree("OtM: ", nextNode, depth + 1, new HashSet<>(visited));
+            } else {
+                System.out.println("  (Cycle Detected: " + nextNode.getEntityClass().getSimpleName() + ")");
+            }
+        }
+
+        for (EntityInfo nextNode : mtmNextFieldMap.keySet()) {
+            if (!visited.contains(nextNode)) {
+                printEntityTree("MtM: ", nextNode, depth + 1, new HashSet<>(visited));
+            } else {
                 System.out.println("  (Cycle Detected: " + nextNode.getEntityClass().getSimpleName() + ")");
             }
         }
