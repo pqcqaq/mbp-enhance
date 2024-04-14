@@ -98,9 +98,4 @@ public class EntityRelation {
             System.out.println(list);
         });
     }
-
-    public static <T> EntityInfo<?, ? extends EnhanceService<?, ?>,
-            ? extends BaseMapper<?>> getEntityInfoByClass(Class<T> clazz) {
-        return entityInfoMap.values().stream().filter(entityInfo -> entityInfo.getEntityClass().equals(clazz)).findFirst().orElse(null);
-    }
 }

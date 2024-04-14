@@ -30,7 +30,7 @@ public class GeneralEntitySearcher {
      * @return 实体
      */
     public static <T> T searchEntityById(Class<T> clazz, Long id) {
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByClass(clazz);
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByEntityClass(clazz);
         if (entityInfoByClass == null) {
             return null;
         }
@@ -48,7 +48,7 @@ public class GeneralEntitySearcher {
      * @return 实体
      */
     public static <E> E eq(Class<E> entityClass, SFunction<E, ?> e, Serializable s) {
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByClass(entityClass);
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByEntityClass(entityClass);
         if (entityInfoByClass == null) {
             return null;
         }
@@ -67,7 +67,7 @@ public class GeneralEntitySearcher {
      * @return 实体
      */
     public static <E> E eq(Class<E> entityClass, SFunction<E, ?> e, Serializable s, int deep) {
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByClass(entityClass);
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByEntityClass(entityClass);
         if (entityInfoByClass == null) {
             return null;
         }
@@ -85,7 +85,7 @@ public class GeneralEntitySearcher {
      * @return 实体列表
      */
     public static <E> List<E> fuzzyQuery(Class<E> entityClass, SFunction<E, ?> e, Serializable s) {
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByClass(entityClass);
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByEntityClass(entityClass);
         if (entityInfoByClass == null) {
             return null;
         }
@@ -104,7 +104,7 @@ public class GeneralEntitySearcher {
      * @return 实体列表
      */
     public static <E> List<E> fuzzyQuery(Class<E> entityClass, SFunction<E, ?> e, Serializable s, int deep) {
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByClass(entityClass);
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByEntityClass(entityClass);
         if (entityInfoByClass == null) {
             return null;
         }
@@ -134,7 +134,7 @@ public class GeneralEntitySearcher {
                 throw new ErrorSearchException("实体类" + entityClass.getSimpleName() + "未设置create_time字段");
             }
         }
-        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByClass(entityClass);
+        EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByEntityClass(entityClass);
         if (entityInfoByClass == null) {
             return null;
         }
