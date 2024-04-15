@@ -7,3 +7,5 @@ online.zust.qcqcqc.utils.utils.ProxyUtil
 online.zust.qcqcqc.utils.enhance.EntityRelaRegister
 online.zust.qcqcqc.utils.enhance.checker.CheckHandler
 online.zust.qcqcqc.utils.enhance.searcher.GeneralEntitySearcher
+online.zust.qcqcqc.utils.generators.table.TableGenerator
+

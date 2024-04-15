@@ -18,7 +18,7 @@ public @interface ColumnType {
      *
      * @return DataType
      */
-    DataType type() default DataType.Varchar;
+    DataType type();
 
     /**
      * 长度
@@ -40,4 +40,11 @@ public @interface ColumnType {
      * @return String
      */
     String comment() default "";
+
+    /**
+     * 默认值
+     *
+     * @return String
+     */
+    String defaultValue() default "";
 }
