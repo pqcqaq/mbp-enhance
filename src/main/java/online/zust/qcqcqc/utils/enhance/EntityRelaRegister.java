@@ -118,11 +118,11 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
                     EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo2 = EntityRelation.getEntityInfoMap().get(targetService);
                     entityInfo.addMtMNextField(entityInfo2, declaredField);
                     entityInfo2.addMtMPreviousField(entityInfo1, declaredField);
-                    // 还需要给关系表添加一对一和一对多关系(原对象中一对多，目标对象中一对一)
-                    entityInfo.addOtMNextField(entityInfo1, declaredField);
-                    entityInfo1.addOtMPreviousField(entityInfo, declaredField);
-                    entityInfo2.addOtONextField(entityInfo1, declaredField);
-                    entityInfo1.addOtOPreviousField(entityInfo2, declaredField);
+//                    // 还需要给关系表添加一对一和一对多关系(原对象中一对多，目标对象中一对一)
+//                    entityInfo.addOtMNextField(entityInfo1, declaredField);
+//                    entityInfo1.addOtMPreviousField(entityInfo, declaredField);
+//                    entityInfo2.addOtONextField(entityInfo1, declaredField);
+//                    entityInfo1.addOtOPreviousField(entityInfo2, declaredField);
                 }
             }
         });

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serial;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -188,7 +189,14 @@ public class BeanConvertUtils {
      * @throws NoSuchFieldException   无法找到字段
      */
     private static <A, B> void handleListType(B before, A after, boolean nullable, Field declaredField) throws IllegalAccessException, NoSuchFieldException {
-        // 检查原始数据中是否有字段
+        // 检查类型是否为自定义类型
+        Type genericType1 = declaredField.getGenericType();
+        ParameterizedType genericTypea = (ParameterizedType) genericType1;
+        Type[] genericTypes = genericTypea.getActualTypeArguments();
+        if (genericTypes[0].getTypeName().startsWith("java")) {
+            // 如果是java开头的字段，就不需要再处理了
+            return;
+        }
         // 转为数组并进行递归赋值
         List<?> list = (List<?>) declaredField.get(after);
         // 在原始对象中查找同名的字段或者根据注解查找字段
@@ -226,15 +234,13 @@ public class BeanConvertUtils {
         // 如果字段值不为null,则将原始对象和目标对象的List进行遍历递归赋值
         log.debug("尝试转换List字段，从原始对象字段{}转换到目标对象字段{}", field.getName(), declaredField.getName());
         // 如果字段值不为null,则进行递归赋值
-        Class<?> targetClass;
-        if (!list.isEmpty()) {
-            // 从第一个元素中获取
-            targetClass = list.get(0).getClass();
-        } else {
-            // 从数组的泛型信息中获取，而不是从第一个元素中获取
-            Type genericType = declaredField.getGenericType();
-            targetClass = genericType.getClass();
-        }
+        Class<?> targetClass = (Class<?>) genericTypes[0];
+//        if (!list.isEmpty()) {
+//            // 从第一个元素中获取
+//            targetClass = list.get(0).getClass();
+//        } else {
+        // 从数组的泛型信息中获取，而不是从第一个元素中获取
+//        }
         List<?> list1 = listValue.stream().map(item -> objectConvent(item, targetClass)).toList();
         declaredField.set(after, list1);
     }
