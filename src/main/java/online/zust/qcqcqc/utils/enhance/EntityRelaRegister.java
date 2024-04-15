@@ -47,7 +47,7 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
         }
         initRelation();
         addRelaToTree();
-        logger.info("实体类关联注册完成: {}", enhanceServiceList.stream().map(item -> item.getClass().getSimpleName()).toList());
+        logger.info("实体类关联注册完成: {}", enhanceServiceList);
     }
 
     /**
