@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import online.zust.qcqcqc.utils.generators.annotation.ColumnType;
+import online.zust.qcqcqc.utils.generators.enums.DataType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,30 +21,35 @@ public class BaseEntity implements Serializable {
      * 主键ID
      */
     @TableId
+    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "主键ID")
     private Long id;
 
     /**
      * 本条记录创建人，insert操作的时候自动为该字段赋值
      */
     @TableField(fill = FieldFill.INSERT)
+    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "本条记录创建人")
     private Long createBy;
 
     /**
      * 本条记录创建时间，insert操作的时候自动为该字段赋值
      */
     @TableField(fill = FieldFill.INSERT)
+    @ColumnType(type = DataType.Datetime, nullable = false, comment = "本条记录创建时间")
     private Date createTime;
 
     /**
      * 本条记录更新人，insert或update操作的时候自动为该字段赋值，select = false
      */
     @TableField(fill = FieldFill.INSERT_UPDATE, select = false)
+    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "本条记录更新人")
     private Long updateBy;
 
     /**
      * 本条记录更新时间，insert或update操作的时候自动为该字段赋值，select = false
      */
     @TableField(fill = FieldFill.INSERT_UPDATE, select = false)
+    @ColumnType(type = DataType.Datetime, nullable = false, comment = "本条记录更新时间")
     private Date updateTime;
 
     /**
@@ -50,6 +57,7 @@ public class BaseEntity implements Serializable {
      */
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
+    @ColumnType(type = DataType.Tinyint, length = 1, nullable = false, comment = "逻辑删除标识")
     private Boolean deleted;
 
     public Long getCreateBy() {
