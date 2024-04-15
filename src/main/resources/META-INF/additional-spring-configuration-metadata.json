@@ -28,6 +28,10 @@
         {
           "value": "jackson",
           "description": "使用jackson作为默认转换器."
+        },
+        {
+          "value": "custom",
+          "description": "使用自定义转换器作为默认转换器."
         }
       ]
     },
