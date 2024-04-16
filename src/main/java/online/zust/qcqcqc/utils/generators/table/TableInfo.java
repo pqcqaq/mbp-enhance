@@ -28,20 +28,29 @@ public class TableInfo {
     private final String charset;
     private final String collation;
     private final String engine;
+    private final Boolean dropTable;
 
-    public TableInfo(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo, String charset, String collation, String engine) {
+    public TableInfo(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo, String charset, String collation, String engine, Boolean dropTable) {
         this.tableName = entityInfo.getEntityClass().getAnnotation(TableName.class).value();
         this.entityInfo = entityInfo;
         this.charset = charset;
         this.collation = collation;
         this.engine = engine;
+        this.dropTable = dropTable;
     }
 
     public void createTable(JdbcTemplate session) {
         String sql = genInitSql();
         log.info("创建表 `{}`: \n{}", tableName, sql);
         try {
+            if (dropTable) {
+                log.warn("删除表 `{}` 并尝试重新创建", tableName);
+                String header = "DROP TABLE IF EXISTS %s; \n";
+                String format = String.format(header, tableName);
+                session.execute(format);
+            }
             session.execute(sql);
+            log.info("创建表 `{}` 成功", tableName);
         } catch (Exception e) {
             log.error("创建表 `{}` 失败", tableName, e);
         }
@@ -49,7 +58,6 @@ public class TableInfo {
 
     private String genInitSql() {
         Class<?> entityClass = entityInfo.getEntityClass();
-        boolean equals = "BaseEntity".equals(entityClass.getSuperclass().getSimpleName());
         @Language("MySQL")
         String sql = """
                 CREATE TABLE IF NOT EXISTS %s (
@@ -57,15 +65,16 @@ public class TableInfo {
                 ) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s;
                 """;
         StringJoiner stringJoiner = new StringJoiner(",\n");
-        if (equals) {
-            genColumnSql(stringJoiner, entityClass.getSuperclass());
-        }
         genColumnSql(stringJoiner, entityClass);
         return String.format(sql, tableName, stringJoiner, engine, charset, collation);
     }
 
-    private void genColumnSql(StringJoiner stringJoiner, Class<?> superclass) {
-        Field[] declaredFields = superclass.getDeclaredFields();
+    private void genColumnSql(StringJoiner stringJoiner, Class<?> entityClass) {
+        boolean equals = "Object".equals(entityClass.getSuperclass().getSimpleName());
+        if (!equals) {
+            genColumnSql(stringJoiner, entityClass.getSuperclass());
+        }
+        Field[] declaredFields = entityClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
             if (isExcludedField(declaredField)) {
                 continue;

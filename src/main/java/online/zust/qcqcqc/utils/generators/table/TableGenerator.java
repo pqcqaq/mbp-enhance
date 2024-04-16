@@ -7,7 +7,6 @@ import online.zust.qcqcqc.utils.enhance.EntityRelation;
 import online.zust.qcqcqc.utils.generators.enums.DbCharset;
 import online.zust.qcqcqc.utils.generators.enums.DbCollation;
 import online.zust.qcqcqc.utils.generators.enums.DbEngine;
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -50,13 +49,18 @@ public class TableGenerator implements InitializingBean {
      */
     @Value("${mbp-enhance.generator.table.engine:InnoDB}")
     private String engine;
+    /**
+     * 是否删除表
+     */
+    @Value("${mbp-enhance.generator.table.drop-table:false}")
+    private Boolean dropTable;
 
     public void initTable() {
         Map<Class<?>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> entityInfos = EntityRelation.getEntityInfos();
         Set<Class<?>> classes = entityInfos.keySet();
         for (Class<?> clazz : classes) {
             EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = entityInfos.get(clazz);
-            TableInfo tableInfo = new TableInfo(entityInfo, charset, collation, engine);
+            TableInfo tableInfo = new TableInfo(entityInfo, charset, collation, engine,dropTable);
             tableInfo.createTable(jdbcTemplate);
         }
     }

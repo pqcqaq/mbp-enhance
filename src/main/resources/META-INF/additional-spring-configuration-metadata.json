@@ -11,6 +11,38 @@
       "type": "java.lang.Boolean",
       "description": "是否启用Debug模式.",
       "defaultValue": "false"
+    },
+    {
+      "name": "mbp-enhance.generator.table.drop-table",
+      "type": "java.lang.Boolean",
+      "description": "是否删除表后再创建.",
+      "defaultValue": "false"
+    },
+    {
+      "name": "mbp-enhance.generator.enable",
+      "type": "java.lang.Boolean",
+      "description": "是否启用表生成.",
+      "defaultValue": "false"
+    },
+    {
+      "name": "mbp-enhance.generator.table.charset",
+      "type": "java.lang.String",
+      "description": "设置表字符集."
+    },
+    {
+      "name": "mbp-enhance.generator.table.collation",
+      "type": "java.lang.String",
+      "description": "设置表校对集."
+    },
+    {
+      "name": "mbp-enhance.generator.table.engine",
+      "type": "java.lang.String",
+      "description": "设置表引擎."
+    },
+    {
+      "name": "mbp-enhance.generator.table.prefix",
+      "type": "java.lang.String",
+      "description": "设置表前缀."
     }
   ],
   "hints": [
@@ -45,6 +77,99 @@
         {
           "value": "false",
           "description": "禁用Debug输出."
+        }
+      ]
+    },
+    {
+      "name": "mbp-enhance.generator.table.drop-table",
+      "values": [
+        {
+          "value": "true",
+          "description": "删除表后再创建."
+        },
+        {
+          "value": "false",
+          "description": "不删除表直接创建."
+        }
+      ]
+    },
+    {
+      "name": "mbp-enhance.generator.enable",
+      "values": [
+        {
+          "value": "true",
+          "description": "启用表生成."
+        },
+        {
+          "value": "false",
+          "description": "禁用表生成."
+        }
+      ]
+    },
+    {
+      "name": "mbp-enhance.generator.table.charset",
+      "values": [
+        {
+          "value": "utf8",
+          "description": "设置表字符集为utf8."
+        },
+        {
+          "value": "utf8mb4",
+          "description": "设置表字符集为utf8mb4."
+        },
+        {
+          "value": "gbk",
+          "description": "设置表字符集为gbk."
+        }
+      ]
+    },
+    {
+      "name": "mbp-enhance.generator.table.collation",
+      "values": [
+        {
+          "value": "utf8_general_ci",
+          "description": "设置表校对集为utf8_general_ci."
+        },
+        {
+          "value": "utf8mb4_general_ci",
+          "description": "设置表校对集为utf8mb4_general_ci."
+        },
+        {
+          "value": "gbk_chinese_ci",
+          "description": "设置表校对集为gbk_chinese_ci."
+        },
+        {
+          "value": "gbk_bin",
+          "description": "设置表校对集为gbk_bin."
+        },
+        {
+          "value": "utf8_bin",
+          "description": "设置表校对集为utf8_bin."
+        },
+        {
+          "value": "utf8mb4_bin",
+          "description": "设置表校对集为utf8mb4_bin."
+        },
+        {
+          "value": "utf8mb4_ai_ci",
+          "description": "设置表校对集为utf8mb4_ai_ci."
+        }
+      ]
+    },
+    {
+      "name": "mbp-enhance.generator.table.engine",
+      "values": [
+        {
+          "value": "innodb",
+          "description": "设置表引擎为innodb."
+        },
+        {
+          "value": "myisam",
+          "description": "设置表引擎为myisam."
+        },
+        {
+          "value": "memory",
+          "description": "设置表引擎为memory."
         }
       ]
     }
