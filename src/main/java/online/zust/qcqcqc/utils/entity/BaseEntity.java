@@ -28,28 +28,28 @@ public class BaseEntity implements Serializable {
      * 本条记录创建人，insert操作的时候自动为该字段赋值
      */
     @TableField(fill = FieldFill.INSERT)
-    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "本条记录创建人")
+    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "本条记录创建人", defaultValue = "0")
     private Long createBy;
 
     /**
      * 本条记录创建时间，insert操作的时候自动为该字段赋值
      */
     @TableField(fill = FieldFill.INSERT)
-    @ColumnType(type = DataType.Datetime, nullable = false, comment = "本条记录创建时间")
+    @ColumnType(type = DataType.Datetime, nullable = false, comment = "本条记录创建时间", defaultValue = "CURRENT_TIMESTAMP")
     private Date createTime;
 
     /**
      * 本条记录更新人，insert或update操作的时候自动为该字段赋值，select = false
      */
     @TableField(fill = FieldFill.INSERT_UPDATE, select = false)
-    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "本条记录更新人")
+    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "本条记录更新人", defaultValue = "0")
     private Long updateBy;
 
     /**
      * 本条记录更新时间，insert或update操作的时候自动为该字段赋值，select = false
      */
     @TableField(fill = FieldFill.INSERT_UPDATE, select = false)
-    @ColumnType(type = DataType.Datetime, nullable = false, comment = "本条记录更新时间")
+    @ColumnType(type = DataType.Datetime, nullable = false, comment = "本条记录更新时间", defaultValue = "CURRENT_TIMESTAMP")
     private Date updateTime;
 
     /**
@@ -57,7 +57,7 @@ public class BaseEntity implements Serializable {
      */
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
-    @ColumnType(type = DataType.Tinyint, length = 1, nullable = false, comment = "逻辑删除标识")
+    @ColumnType(type = DataType.Tinyint, length = 1, nullable = false, comment = "逻辑删除标识", defaultValue = "0")
     private Boolean deleted;
 
     public Long getCreateBy() {
