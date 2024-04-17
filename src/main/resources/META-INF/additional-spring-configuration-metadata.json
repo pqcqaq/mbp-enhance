@@ -43,6 +43,11 @@
       "name": "mbp-enhance.generator.table.prefix",
       "type": "java.lang.String",
       "description": "设置表前缀."
+    },
+    {
+      "name": "mbp-enhance.generator.table.on-boot",
+      "type": "java.lang.Boolean",
+      "description": "是否在启动时生成表."
     }
   ],
   "hints": [
@@ -170,6 +175,19 @@
         {
           "value": "memory",
           "description": "设置表引擎为memory."
+        }
+      ]
+    },
+    {
+      "name": "mbp-enhance.generator.table.on-boot",
+      "values": [
+        {
+          "value": "true",
+          "description": "在启动时生成表."
+        },
+        {
+          "value": "false",
+          "description": "不在启动时生成表."
         }
       ]
     }

@@ -30,8 +30,8 @@ public class TableInfo {
     private final String engine;
     private final Boolean dropTable;
 
-    public TableInfo(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo, String charset, String collation, String engine, Boolean dropTable) {
-        this.tableName = entityInfo.getEntityClass().getAnnotation(TableName.class).value();
+    public TableInfo(EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo, String charset, String collation, String engine, Boolean dropTable, String prefix) {
+        this.tableName = prefix + entityInfo.getEntityClass().getAnnotation(TableName.class).value();
         this.entityInfo = entityInfo;
         this.charset = charset;
         this.collation = collation;

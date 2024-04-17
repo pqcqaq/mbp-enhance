@@ -54,13 +54,23 @@ public class TableGenerator implements InitializingBean {
      */
     @Value("${mbp-enhance.generator.table.drop-table:false}")
     private Boolean dropTable;
+    /**
+     * 表的前缀
+     */
+    @Value("${mbp-enhance.generator.table.prefix:}")
+    private String prefix;
+    /**
+     * 是否在启动时创建表
+     */
+    @Value("${mbp-enhance.generator.table.on-boot:false}")
+    private Boolean onBoot;
 
     public void initTable() {
         Map<Class<?>, EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>>> entityInfos = EntityRelation.getEntityInfos();
         Set<Class<?>> classes = entityInfos.keySet();
         for (Class<?> clazz : classes) {
             EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfo = entityInfos.get(clazz);
-            TableInfo tableInfo = new TableInfo(entityInfo, charset, collation, engine,dropTable);
+            TableInfo tableInfo = new TableInfo(entityInfo, charset, collation, engine, dropTable, prefix);
             tableInfo.createTable(jdbcTemplate);
         }
     }
@@ -83,5 +93,8 @@ public class TableGenerator implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         checkDatabaseInfo();
+        if (onBoot) {
+            initTable();
+        }
     }
 }
