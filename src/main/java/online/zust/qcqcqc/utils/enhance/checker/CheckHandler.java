@@ -3,7 +3,7 @@ package online.zust.qcqcqc.utils.enhance.checker;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
-import online.zust.qcqcqc.utils.annotation.MsgOnInversePointer;
+import online.zust.qcqcqc.utils.annotation.MsgOnCheckError;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
 import online.zust.qcqcqc.utils.enhance.EntityInfo;
 import online.zust.qcqcqc.utils.enhance.EntityRelation;
@@ -87,7 +87,7 @@ public class CheckHandler {
             Object o = declaredField.get(entity);
             if (o != null) {
                 if (o instanceof List list && !list.isEmpty()) {
-                    MsgOnInversePointer annotation = declaredField.getAnnotation(MsgOnInversePointer.class);
+                    MsgOnCheckError annotation = declaredField.getAnnotation(MsgOnCheckError.class);
                     String msg = annotation == null ? "待删除的对象的子查询存在数据：" + "(list: " + list + ")" + "无法删除" : annotation.value();
                     throw new DependencyCheckException(msg);
                 }
@@ -103,7 +103,7 @@ public class CheckHandler {
             Object o = declaredField.get(entity);
             if (o != null) {
                 if (o instanceof List list && !list.isEmpty()) {
-                    MsgOnInversePointer annotation = declaredField.getAnnotation(MsgOnInversePointer.class);
+                    MsgOnCheckError annotation = declaredField.getAnnotation(MsgOnCheckError.class);
                     String msg = annotation == null ? "待删除的对象的子查询存在数据：" + "(list: " + list + ")" + "无法删除" : annotation.value();
                     throw new DependencyCheckException(msg);
                 }
@@ -124,7 +124,7 @@ public class CheckHandler {
         objectQueryWrapper.eq(field, id);
         List<Object> list = service1.list(objectQueryWrapper, 0);
         if (!list.isEmpty()) {
-            MsgOnInversePointer annotation1 = declaredField.getAnnotation(MsgOnInversePointer.class);
+            MsgOnCheckError annotation1 = declaredField.getAnnotation(MsgOnCheckError.class);
             String msg = annotation1 == null ? "待删除的对象在类" + entityClass.getSimpleName() + "(list: " + list + ")" + "中存在依赖关系，无法删除" : annotation1.value();
             throw new DependencyCheckException(msg);
         }
