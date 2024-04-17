@@ -34,7 +34,6 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -111,7 +110,6 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         return this.baseMapper;
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean saveBatch(Collection<T> entityList, int batchSize) {
         String sqlStatement = getSqlStatement(SqlMethod.INSERT_ONE);
@@ -139,7 +137,6 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         return false;
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean saveOrUpdateBatch(Collection<T> entityList, int batchSize) {
         TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
@@ -157,7 +154,6 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         });
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateBatchById(Collection<T> entityList, int batchSize) {
         String sqlStatement = getSqlStatement(SqlMethod.UPDATE_BY_ID);

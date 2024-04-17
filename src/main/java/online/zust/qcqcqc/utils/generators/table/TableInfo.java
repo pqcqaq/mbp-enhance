@@ -9,7 +9,6 @@ import online.zust.qcqcqc.utils.enhance.EntityInfo;
 import online.zust.qcqcqc.utils.generators.annotation.ColumnType;
 import online.zust.qcqcqc.utils.generators.enums.DataType;
 import online.zust.qcqcqc.utils.utils.FieldNameConvertUtils;
-import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -58,7 +57,6 @@ public class TableInfo {
 
     private String genInitSql() {
         Class<?> entityClass = entityInfo.getEntityClass();
-        @Language("MySQL")
         String sql = """
                 CREATE TABLE IF NOT EXISTS %s (
                     %s
