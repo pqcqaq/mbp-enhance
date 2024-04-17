@@ -64,7 +64,7 @@ public class TableInfo {
                     %s
                 ) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s;
                 """;
-        StringJoiner stringJoiner = new StringJoiner(",\n");
+        StringJoiner stringJoiner = new StringJoiner(",\n\t");
         genColumnSql(stringJoiner, entityClass);
         return String.format(sql, tableName, stringJoiner, engine, charset, collation);
     }
