@@ -9,7 +9,7 @@ public enum DataType {
     /**
      * bigint
      */
-    Bigint(0, "bigint", true),
+    Bigint(0, "bigint", false),
     Binary(1, "binary", true),
     Bit(2, "bit", true),
     Blob(3, "blob", true),
