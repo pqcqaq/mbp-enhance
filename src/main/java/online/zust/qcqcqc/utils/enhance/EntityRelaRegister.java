@@ -9,6 +9,7 @@ import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
 import online.zust.qcqcqc.utils.exception.MbpEnhanceBeanRegisterError;
+import online.zust.qcqcqc.utils.utils.ReflectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
@@ -153,26 +154,7 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
      */
     @NotNull
     public static Field getIdField(Class entityClass) {
-        Field idField = null;
-        Class superclass = entityClass.getSuperclass();
-        boolean equals = "BaseEntity".equals(superclass.getSimpleName());
-        if (!equals) {
-            Field[] declaredFields = entityClass.getDeclaredFields();
-            for (Field declaredField : declaredFields) {
-                if (declaredField.isAnnotationPresent(TableId.class)) {
-                    idField = declaredField;
-                    break;
-                }
-            }
-        } else {
-            Field declaredField;
-            try {
-                declaredField = superclass.getDeclaredField("id");
-            } catch (NoSuchFieldException e) {
-                throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
-            }
-            idField = declaredField;
-        }
+        Field idField = ReflectUtils.recursiveGetField(entityClass, "id");
         if (idField == null) {
             throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
         }

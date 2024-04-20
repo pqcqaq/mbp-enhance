@@ -24,6 +24,7 @@ import online.zust.qcqcqc.utils.exception.DependencyCheckException;
 import online.zust.qcqcqc.utils.exception.ErrorDeepSearchException;
 import online.zust.qcqcqc.utils.utils.FieldNameConvertUtils;
 import online.zust.qcqcqc.utils.utils.ProxyUtil;
+import online.zust.qcqcqc.utils.utils.ReflectUtils;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
@@ -412,20 +413,7 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
     }
 
     private Field getDeclaredField(Class<?> aClass, String field) {
-        Field declaredField = null;
-        try {
-            declaredField = aClass.getDeclaredField(field);
-        } catch (Exception e) {
-            Class superclass = aClass.getSuperclass();
-            boolean equals = "BaseEntity".equals(superclass.getSimpleName());
-            if (equals) {
-                try {
-                    declaredField = superclass.getDeclaredField(field);
-                } catch (Exception ex) {
-                    log.error("没有找到字段: " + field);
-                }
-            }
-        }
+        Field declaredField = ReflectUtils.recursiveGetField(aClass, field);
         if (declaredField == null) {
             throw new ErrorDeepSearchException("没有找到字段: " + field);
         }

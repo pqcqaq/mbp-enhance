@@ -7,6 +7,7 @@ import online.zust.qcqcqc.utils.EnhanceService;
 import online.zust.qcqcqc.utils.enhance.EntityInfo;
 import online.zust.qcqcqc.utils.enhance.EntityRelation;
 import online.zust.qcqcqc.utils.exception.ErrorSearchException;
+import online.zust.qcqcqc.utils.utils.ReflectUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -120,19 +121,9 @@ public class GeneralEntitySearcher {
      * @return 分页数据
      */
     public static <E> E getLatest(Class<E> entityClass) {
-        boolean equals = "BaseEntity".equals(entityClass.getSuperclass().getSimpleName());
-        if (!equals) {
-            Field[] declaredFields = entityClass.getDeclaredFields();
-            boolean hasCreateTime = false;
-            for (Field declaredField : declaredFields) {
-                if ("createTime".equals(declaredField.getName())) {
-                    hasCreateTime = true;
-                    break;
-                }
-            }
-            if (!hasCreateTime) {
-                throw new ErrorSearchException("实体类" + entityClass.getSimpleName() + "未设置create_time字段");
-            }
+        Field createTime = ReflectUtils.recursiveGetField(entityClass, "createTime");
+        if (createTime == null) {
+            throw new ErrorSearchException("实体类" + entityClass.getSimpleName() + "未设置createTime字段");
         }
         EntityInfo<?, ? extends EnhanceService<?, ?>, ? extends BaseMapper<?>> entityInfoByClass = EntityRelation.getEntityInfoByEntityClass(entityClass);
         if (entityInfoByClass == null) {
