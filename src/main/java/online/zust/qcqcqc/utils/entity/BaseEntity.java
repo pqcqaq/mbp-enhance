@@ -41,15 +41,15 @@ public class BaseEntity implements Serializable {
     /**
      * 本条记录更新人，insert或update操作的时候自动为该字段赋值，select = false
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE, select = false)
-    @ColumnType(type = DataType.Bigint, length = 20, nullable = false, comment = "本条记录更新人", defaultValue = "0")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @ColumnType(type = DataType.Bigint, length = 20, comment = "本条记录更新人", defaultValue = "0")
     private Long updateBy;
 
     /**
      * 本条记录更新时间，insert或update操作的时候自动为该字段赋值，select = false
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE, select = false)
-    @ColumnType(type = DataType.Datetime, nullable = false, comment = "本条记录更新时间", defaultValue = "CURRENT_TIMESTAMP")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @ColumnType(type = DataType.Datetime, comment = "本条记录更新时间", defaultValue = "CURRENT_TIMESTAMP")
     private Date updateTime;
 
     /**
