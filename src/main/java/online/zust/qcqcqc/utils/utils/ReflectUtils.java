@@ -1,5 +1,8 @@
 package online.zust.qcqcqc.utils.utils;
 
+import com.baomidou.mybatisplus.annotation.TableId;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 /**
@@ -20,6 +23,24 @@ public class ReflectUtils {
             } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass();
             }
+        }
+        return field;
+    }
+
+    public static Field recursiveGetFieldWithAnnotation(Class<?> entityClass, Class<? extends Annotation> tableIdClass) {
+        Field field = null;
+        while (entityClass != null) {
+            Field[] declaredFields = entityClass.getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                if (declaredField.isAnnotationPresent(tableIdClass)) {
+                    field = declaredField;
+                    break;
+                }
+            }
+            if (field != null) {
+                break;
+            }
+            entityClass = entityClass.getSuperclass();
         }
         return field;
     }

@@ -11,6 +11,7 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
     private final Map<EntityInfo, List<Field>> otoPreviousFieldMap;
     private final Map<EntityInfo, List<Field>> otmPreviousFieldMap;
     private final Map<EntityInfo, List<Field>> mtmPreviousFieldMap;
+    private String tableName;
     private Class<E> entityClass;
     private Field idField;
     private S service;
@@ -18,10 +19,19 @@ public class EntityInfo<E, S extends EnhanceService<M, E>, M extends BaseMapper<
     private final Map<EntityInfo, List<Field>> otmNextFieldMap;
     private final Map<EntityInfo, List<Field>> mtmNextFieldMap;
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     public EntityInfo() {
         this.otoPreviousFieldMap = new HashMap<>();
         this.otmPreviousFieldMap = new HashMap<>();
         this.mtmPreviousFieldMap = new HashMap<>();
+        this.tableName = null;
         this.entityClass = null;
         this.idField = null;
         this.service = null;

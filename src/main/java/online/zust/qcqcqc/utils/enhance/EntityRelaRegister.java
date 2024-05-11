@@ -139,6 +139,13 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
         doCheckBean(entityClass);
         Field idField = getIdField(entityClass);
         EntityInfo objectEnhanceServiceBaseMapperEntityInfo = new EntityInfo();
+        Annotation annotation = entityClass.getAnnotation(TableName.class);
+        if (annotation != null) {
+            TableName tableName = (TableName) annotation;
+            objectEnhanceServiceBaseMapperEntityInfo.setTableName(tableName.value());
+        } else {
+            objectEnhanceServiceBaseMapperEntityInfo.setTableName(entityClass.getSimpleName().toLowerCase());
+        }
         objectEnhanceServiceBaseMapperEntityInfo.setEntityClass(entityClass);
         objectEnhanceServiceBaseMapperEntityInfo.setIdField(idField);
         objectEnhanceServiceBaseMapperEntityInfo.setService(enhanceService);
@@ -169,9 +176,9 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
     private void doCheckBean(Class entityClass) {
         Field[] declaredFields = entityClass.getDeclaredFields();
         Annotation annotation = entityClass.getAnnotation(TableName.class);
-        boolean hasTableId = false;
         if (annotation == null) {
-            throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表名");
+            logger.warn("实体类{}未设置表名，将使用自动驼峰映射", entityClass.getSimpleName());
+//            throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表名");
         }
         for (Field declaredField : declaredFields) {
             if (declaredField.isAnnotationPresent(OtODeepSearch.class) || declaredField.isAnnotationPresent(OtMDeepSearch.class) || declaredField.isAnnotationPresent(MtMDeepSearch.class)) {
@@ -184,17 +191,16 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
                     throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "的字段" + declaredField.getName() + "未在数据库中存在, 请添加@TableField(exist = false)注解");
                 }
             }
-            if (declaredField.isAnnotationPresent(TableId.class)) {
-                hasTableId = true;
-            }
         }
-        if (!hasTableId) {
-            Class<?> superclass = entityClass.getSuperclass();
-            boolean equals = "BaseEntity".equals(superclass.getSimpleName());
-            if (!equals) {
-                throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
-            }
+        boolean finded = findIdField(entityClass);
+        if (!finded) {
+            throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
         }
+    }
+
+    private boolean findIdField(Class<?> entityClass) {
+        Field idField = ReflectUtils.recursiveGetFieldWithAnnotation(entityClass, TableId.class);
+        return idField != null;
     }
 
     /**
