@@ -7,11 +7,13 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.zust.qcqcqc.utils.EnhanceService;
 import online.zust.qcqcqc.utils.enhance.EntityInfo;
 import online.zust.qcqcqc.utils.generators.annotation.ColumnType;
+import online.zust.qcqcqc.utils.generators.config.DefaultColumnTypeMap;
 import online.zust.qcqcqc.utils.generators.enums.DataType;
 import online.zust.qcqcqc.utils.utils.FieldNameConvertUtils;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.StringJoiner;
 
@@ -88,8 +90,9 @@ public class TableInfo {
             name = FieldNameConvertUtils.camelToUnderline(name);
             if (columnType == null) {
                 log.warn("字段 `{}` 未指定类型，将在创建时使用默认类型映射", name);
-                type = isIdField ? DataType.Bigint : DataType.Varchar;
-                length = 255;
+                DataType dataType = DefaultColumnTypeMap.getDataType(declaredField.getType());
+                type = dataType;
+                length = dataType.getDefaultLength();
                 nullable = true;
                 comment = "";
                 defaultValue = "";
@@ -100,6 +103,7 @@ public class TableInfo {
                 comment = columnType.comment();
                 defaultValue = columnType.defaultValue();
             }
+
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(name);
             stringBuilder.append(" ");

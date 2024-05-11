@@ -66,4 +66,8 @@ public enum DataType {
     public boolean hasLength() {
         return hasLength;
     }
+
+    public int getDefaultLength() {
+        return 255;
+    }
 }
