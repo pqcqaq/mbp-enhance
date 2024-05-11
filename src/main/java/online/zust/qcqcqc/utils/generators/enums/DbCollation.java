@@ -32,4 +32,4 @@ public enum DbCollation {
         }
         return false;
     }
-    }
+}

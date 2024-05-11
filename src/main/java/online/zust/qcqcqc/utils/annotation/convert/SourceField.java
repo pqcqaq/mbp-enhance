@@ -11,12 +11,14 @@ import java.lang.annotation.*;
 public @interface SourceField {
     /**
      * 原始字段名
+     *
      * @return 原始字段名
      */
     String name() default "";
 
     /**
      * 是否允许为空
+     *
      * @return 是否允许为空
      */
     boolean nullable() default false;

@@ -1,7 +1,5 @@
 package online.zust.qcqcqc.utils.annotation;
 
-import org.intellij.lang.annotations.Language;
-
 import java.lang.annotation.*;
 
 /**

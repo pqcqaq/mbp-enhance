@@ -3,7 +3,6 @@ package online.zust.qcqcqc.utils.config.defaults.converter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import online.zust.qcqcqc.utils.config.ConventConfig;
 import online.zust.qcqcqc.utils.config.JsonConverter;
 import online.zust.qcqcqc.utils.config.defaults.DefaultConventConfig;

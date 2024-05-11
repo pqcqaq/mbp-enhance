@@ -39,7 +39,7 @@ public class DateSerializer extends JsonSerializer<Date> implements ObjectSerial
     }
 
     @Override
-    public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features){
+    public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) {
         String format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date) object);
         serializer.write(format);
     }

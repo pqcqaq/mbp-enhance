@@ -15,6 +15,7 @@ import java.lang.annotation.*;
 public @interface RequireDefault {
     /**
      * 默认值（json）
+     *
      * @return 默认值
      */
     @Language("JSON")
@@ -22,6 +23,7 @@ public @interface RequireDefault {
 
     /**
      * 是否在为空时使用默认值
+     *
      * @return 是否在为空时使用默认值
      */
     boolean onNull() default false;

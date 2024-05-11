@@ -11,6 +11,7 @@ import java.lang.annotation.*;
 public @interface CustomConvert {
     /**
      * 是否允许为空
+     *
      * @return 是否允许为空
      */
     boolean nullable() default true;

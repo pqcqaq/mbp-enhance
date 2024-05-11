@@ -7,7 +7,6 @@ import online.zust.qcqcqc.utils.config.defaults.converter.FastJsonConverter;
 import online.zust.qcqcqc.utils.config.defaults.converter.JacksonConverter;
 import online.zust.qcqcqc.utils.enhance.EntityRelaRegister;
 import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
-import online.zust.qcqcqc.utils.enhance.checker.DefaultCheckerConfig;
 import online.zust.qcqcqc.utils.enhance.searcher.GeneralEntitySearcher;
 import online.zust.qcqcqc.utils.generators.table.TableGenerator;
 import online.zust.qcqcqc.utils.utils.BeanConvertUtils;

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.baomidou.mybatisplus.extension.parser.JsqlParserFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import online.zust.qcqcqc.utils.exception.DependencyCheckException;
@@ -225,8 +224,9 @@ public interface IServiceEnhance<T> extends IService<T> {
 
     /**
      * 根据字段进行相等查询
-     * @param e 查询的字段
-     * @param s 查询条件
+     *
+     * @param e    查询的字段
+     * @param s    查询条件
      * @param deep 深度
      * @return 分页数据
      */
