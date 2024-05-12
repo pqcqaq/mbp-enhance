@@ -41,4 +41,8 @@ public class FieldNameConvertUtils {
         }
         return sb.toString();
     }
+
+    public static String classNameToUnderline(String className) {
+        return camelToUnderline(className).substring(1);
+    }
 }

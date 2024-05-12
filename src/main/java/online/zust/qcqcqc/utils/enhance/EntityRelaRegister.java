@@ -9,6 +9,7 @@ import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
 import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
 import online.zust.qcqcqc.utils.exception.MbpEnhanceBeanRegisterError;
+import online.zust.qcqcqc.utils.utils.FieldNameConvertUtils;
 import online.zust.qcqcqc.utils.utils.ReflectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -144,7 +145,7 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
             TableName tableName = (TableName) annotation;
             objectEnhanceServiceBaseMapperEntityInfo.setTableName(tableName.value());
         } else {
-            objectEnhanceServiceBaseMapperEntityInfo.setTableName(entityClass.getSimpleName().toLowerCase());
+            objectEnhanceServiceBaseMapperEntityInfo.setTableName(FieldNameConvertUtils.classNameToUnderline(entityClass.getSimpleName()));
         }
         objectEnhanceServiceBaseMapperEntityInfo.setEntityClass(entityClass);
         objectEnhanceServiceBaseMapperEntityInfo.setIdField(idField);
