@@ -162,7 +162,11 @@ public class EntityRelaRegister implements DisposableBean, InitializingBean {
      */
     @NotNull
     public static Field getIdField(Class entityClass) {
-        Field idField = ReflectUtils.recursiveGetField(entityClass, "id");
+        Field idField = ReflectUtils.recursiveGetField(entityClass, TableId.class);
+        // 如果根据注解没找到，就默认去找名为id的字段
+        if (idField == null) {
+            idField = ReflectUtils.recursiveGetField(entityClass, "id");
+        }
         if (idField == null) {
             throw new MbpEnhanceBeanRegisterError("实体类" + entityClass.getSimpleName() + "未设置表主键");
         }

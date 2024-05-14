@@ -27,6 +27,24 @@ public class ReflectUtils {
         return field;
     }
 
+    public static Field recursiveGetField(Class<?> clazz, Class<? extends Annotation> annotation) {
+        Field field = null;
+        while (clazz != null) {
+            Field[] declaredFields = clazz.getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                if (declaredField.isAnnotationPresent(annotation)) {
+                    field = declaredField;
+                    break;
+                }
+            }
+            if (field != null) {
+                break;
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return field;
+    }
+
     public static Field recursiveGetFieldWithAnnotation(Class<?> entityClass, Class<? extends Annotation> tableIdClass) {
         Field field = null;
         while (entityClass != null) {
