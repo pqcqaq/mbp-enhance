@@ -473,11 +473,12 @@ public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhan
         // 这里list出来的是一堆关联对象，需要根据这些对象的目标id去查找对应的实体
         List<Long> targetIds = relaServiceImpl.list(new QueryWrapper<>().eq(column, baseId)).stream().map(e -> {
             try {
-                Field declaredField1 = e.getClass().getDeclaredField(finalTargetIdFieldName);
+                Class<?> aClass1 = e.getClass();
+                Field declaredField1 = getDeclaredField(aClass1, finalTargetIdFieldName);
                 declaredField1.setAccessible(true);
                 return (Long) declaredField1.get(e);
-            } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
-                log.error("获取字段值失败: ", noSuchFieldException);
+            } catch (Exception exception) {
+                log.error("获取字段值失败: ", exception);
                 return null;
             }
         }).toList();
