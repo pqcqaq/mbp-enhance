@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.toolkit.*;
 import com.baomidou.mybatisplus.core.toolkit.reflect.GenericTypeUtils;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import online.zust.qcqcqc.utils.annotation.LastSqlOnSearch;
 import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
@@ -48,121 +49,12 @@ import java.util.function.Function;
  * @author qcqcqc
  */
 @SuppressWarnings("all")
-public class EnhanceService<M extends BaseMapper<T>, T> implements IServiceEnhance<T>, InitializingBean {
+public class EnhanceService<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> implements IServiceEnhance<T>, InitializingBean {
 
     private static final int DEEP = 9;
 
-    protected final Log log = LogFactory.getLog(getClass());
-
-    protected final Class<?>[] typeArguments = GenericTypeUtils.resolveTypeArguments(getClass(), EnhanceService.class);
-
-    protected final Class<T> entityClass = currentModelClass();
-
-    protected Class<T> currentModelClass() {
-        return (Class<T>) this.typeArguments[1];
-    }
-
-    @Override
-    public Class<T> getEntityClass() {
-        return entityClass;
-    }
-
     public Class<? extends EnhanceService> getSelfClass() {
         return getClass();
-    }
-
-    private volatile SqlSessionFactory sqlSessionFactory;
-
-    protected SqlSessionFactory getSqlSessionFactory() {
-        if (this.sqlSessionFactory == null) {
-            synchronized (this) {
-                if (this.sqlSessionFactory == null) {
-                    Object target = this.baseMapper;
-                    // 这个检查目前看着来说基本上可以不用判断Aop是不是存在了.
-                    if (com.baomidou.mybatisplus.extension.toolkit.AopUtils.isLoadSpringAop()) {
-                        if (AopUtils.isAopProxy(this.baseMapper)) {
-                            target = AopProxyUtils.getSingletonTarget(this.baseMapper);
-                        }
-                    }
-                    if (target != null) {
-                        MybatisMapperProxy mybatisMapperProxy = (MybatisMapperProxy) Proxy.getInvocationHandler(target);
-                        SqlSessionTemplate sqlSessionTemplate = (SqlSessionTemplate) mybatisMapperProxy.getSqlSession();
-                        this.sqlSessionFactory = sqlSessionTemplate.getSqlSessionFactory();
-                    } else {
-                        this.sqlSessionFactory = GlobalConfigUtils.currentSessionFactory(this.entityClass);
-                    }
-                }
-            }
-        }
-        return this.sqlSessionFactory;
-    }
-
-    @Autowired
-    protected M baseMapper;
-
-    protected final Class<M> mapperClass = currentMapperClass();
-
-    protected Class<M> currentMapperClass() {
-        return (Class<M>) this.typeArguments[0];
-    }
-
-    @Override
-    public M getBaseMapper() {
-        return this.baseMapper;
-    }
-
-    @Override
-    public boolean saveBatch(Collection<T> entityList, int batchSize) {
-        String sqlStatement = getSqlStatement(SqlMethod.INSERT_ONE);
-        return executeBatch(entityList, batchSize, (sqlSession, entity) -> sqlSession.insert(sqlStatement, entity));
-    }
-
-    protected String getSqlStatement(SqlMethod sqlMethod) {
-        return SqlHelper.getSqlStatement(mapperClass, sqlMethod);
-    }
-
-    protected <E> boolean executeBatch(Collection<E> list, int batchSize, BiConsumer<SqlSession, E> consumer) {
-        return SqlHelper.executeBatch(getSqlSessionFactory(), this.log, list, batchSize, consumer);
-    }
-
-    @Override
-    public boolean saveOrUpdate(T entity) {
-        if (null != entity) {
-            TableInfo tableInfo = TableInfoHelper.getTableInfo(this.entityClass);
-            Assert.notNull(tableInfo, "error: can not execute. because can not find cache of TableInfo for entity!");
-            String keyProperty = tableInfo.getKeyProperty();
-            Assert.notEmpty(keyProperty, "error: can not execute. because can not find column for id from entity!");
-            Object idVal = tableInfo.getPropertyValue(entity, tableInfo.getKeyProperty());
-            return StringUtils.checkValNull(idVal) || Objects.isNull(getById((Serializable) idVal)) ? save(entity) : updateById(entity);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean saveOrUpdateBatch(Collection<T> entityList, int batchSize) {
-        TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
-        Assert.notNull(tableInfo, "error: can not execute. because can not find cache of TableInfo for entity!");
-        String keyProperty = tableInfo.getKeyProperty();
-        Assert.notEmpty(keyProperty, "error: can not execute. because can not find column for id from entity!");
-        return SqlHelper.saveOrUpdateBatch(getSqlSessionFactory(), this.mapperClass, this.log, entityList, batchSize, (sqlSession, entity) -> {
-            Object idVal = tableInfo.getPropertyValue(entity, keyProperty);
-            return StringUtils.checkValNull(idVal)
-                   || CollectionUtils.isEmpty(sqlSession.selectList(getSqlStatement(SqlMethod.SELECT_BY_ID), entity));
-        }, (sqlSession, entity) -> {
-            MapperMethod.ParamMap<T> param = new MapperMethod.ParamMap<>();
-            param.put(Constants.ENTITY, entity);
-            sqlSession.update(getSqlStatement(SqlMethod.UPDATE_BY_ID), param);
-        });
-    }
-
-    @Override
-    public boolean updateBatchById(Collection<T> entityList, int batchSize) {
-        String sqlStatement = getSqlStatement(SqlMethod.UPDATE_BY_ID);
-        return executeBatch(entityList, batchSize, (sqlSession, entity) -> {
-            MapperMethod.ParamMap<T> param = new MapperMethod.ParamMap<>();
-            param.put(Constants.ENTITY, entity);
-            sqlSession.update(sqlStatement, param);
-        });
     }
 
     @Override
