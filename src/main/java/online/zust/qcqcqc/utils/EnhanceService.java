@@ -14,10 +14,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import online.zust.qcqcqc.utils.annotation.LastSqlOnSearch;
-import online.zust.qcqcqc.utils.annotation.MtMDeepSearch;
-import online.zust.qcqcqc.utils.annotation.OtMDeepSearch;
-import online.zust.qcqcqc.utils.annotation.OtODeepSearch;
+import online.zust.qcqcqc.utils.annotation.*;
 import online.zust.qcqcqc.utils.enhance.EntityInfo;
 import online.zust.qcqcqc.utils.enhance.EntityRelation;
 import online.zust.qcqcqc.utils.enhance.checker.CheckHandler;
@@ -259,8 +256,10 @@ public class EnhanceService<M extends BaseMapper<T>, T> extends ServiceImpl<M, T
     private void handleOtMAnnotation(T entity, Field declaredField, Class<?> aClass, int deep) {
         declaredField.setAccessible(true);
         OtMDeepSearch otMDeepSearch = declaredField.getAnnotation(OtMDeepSearch.class);
+        Depth depth = declaredField.getAnnotation(Depth.class);
+        Integer deepValue = getDepthValue(deep, depth);
         try {
-            deepSearchListAndSetValue(entity, declaredField, aClass, otMDeepSearch, deep);
+            deepSearchListAndSetValue(entity, declaredField, aClass, otMDeepSearch, deepValue);
         } catch (Exception e) {
             log.error("获取字段值失败: ", e);
             // 暂时不需要抛出异常，直接返回null
@@ -315,8 +314,10 @@ public class EnhanceService<M extends BaseMapper<T>, T> extends ServiceImpl<M, T
     private void handleMtMAnnotation(T entity, Field deepSearchField, Class<?> aClass, int deep) {
         deepSearchField.setAccessible(true);
         MtMDeepSearch deepSearchList = deepSearchField.getAnnotation(MtMDeepSearch.class);
+        Depth depth = deepSearchField.getAnnotation(Depth.class);
+        Integer deepValue = getDepthValue(deep, depth);
         try {
-            deepSearchListAndSetValue(entity, deepSearchField, aClass, deepSearchList, deep);
+            deepSearchListAndSetValue(entity, deepSearchField, aClass, deepSearchList, deepValue);
         } catch (Exception e) {
             log.error("获取字段值失败: ", e);
             // 暂时不需要抛出异常，直接返回null
@@ -329,8 +330,10 @@ public class EnhanceService<M extends BaseMapper<T>, T> extends ServiceImpl<M, T
     private void handleOtOAnnotation(T entity, Field deepSearchField, Class<?> aClass, int deep) {
         deepSearchField.setAccessible(true);
         OtODeepSearch otODeepSearchEntity = deepSearchField.getAnnotation(OtODeepSearch.class);
+        Depth depth = deepSearchField.getAnnotation(Depth.class);
+        Integer deepValue = getDepthValue(deep, depth);
         try {
-            deepSearchEntityAndSetValue(entity, deepSearchField, aClass, otODeepSearchEntity, deep);
+            deepSearchEntityAndSetValue(entity, deepSearchField, aClass, otODeepSearchEntity, deepValue);
         } catch (Exception e) {
             log.error("获取字段值失败: ", e);
             // 暂时不需要抛出异常，直接返回null
@@ -467,5 +470,19 @@ public class EnhanceService<M extends BaseMapper<T>, T> extends ServiceImpl<M, T
     @Override
     public void afterPropertiesSet() throws Exception {
         log.debug("EnhanceService inited: " + this.getClass().getName());
+    }
+
+    /**
+     * 获取递归深度信息
+     * @param deep  深度
+     * @param depth 深度注解
+     * @return 深度值
+     * 若深度注解为null，则返回deep，否则返回注解中的值或者deep(如果注解中的值为-1)
+     */
+    private Integer getDepthValue(int deep, Depth depth) {
+        if (depth != null) {
+            return depth.value()== -1 ? deep : depth.value();
+        }
+        return deep;
     }
 }
